@@ -2,6 +2,7 @@ package router
 
 import (
 	"smart-home-energy-management-server/interface/http/middleware"
+	"smart-home-energy-management-server/interface/http/routes"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +18,8 @@ func SetupRouter() *gin.Engine {
 		})
 	})
 
-	// v1 := router.Group("/v1")
+	v1 := router.Group("/v1")
+	routes.FileRoutes(v1)
 
 	return router
 }

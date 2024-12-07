@@ -16,4 +16,5 @@ func FileRoutes(version *gin.RouterGroup, redis *redis.Client) {
 	fileHandler := handler.NewFileHandler(fileService)
 
 	version.POST("/upload", fileHandler.UploadFileCSV)
+	version.POST("/chat", fileHandler.Chat)
 }

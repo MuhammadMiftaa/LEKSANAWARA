@@ -8,6 +8,7 @@ import (
 
 type FileRepository interface {
 	SaveTable(table string) error
+	GetTable() (string, error)
 }
 
 type fileRepository struct {
@@ -20,4 +21,8 @@ func NewFileRepository(redis *redis.Client) FileRepository {
 
 func (r *fileRepository) SaveTable(table string) error {
 	return r.redis.Set(context.Background(), "table", table, 0).Err()
+}
+
+func (r *fileRepository) GetTable() (string, error) {
+	return r.redis.Get(context.Background(), "table").Result()
 }

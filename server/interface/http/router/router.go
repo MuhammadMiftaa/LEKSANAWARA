@@ -5,9 +5,10 @@ import (
 	"smart-home-energy-management-server/interface/http/routes"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 )
 
-func SetupRouter() *gin.Engine {
+func SetupRouter(redis *redis.Client) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(middleware.CORSMiddleware())
@@ -19,7 +20,7 @@ func SetupRouter() *gin.Engine {
 	})
 
 	v1 := router.Group("/v1")
-	routes.FileRoutes(v1)
+	routes.FileRoutes(v1, redis)
 
 	return router
 }

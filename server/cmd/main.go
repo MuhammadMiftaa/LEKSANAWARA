@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"smart-home-energy-management-server/config"
 	"smart-home-energy-management-server/interface/http/router"
 
 	"github.com/joho/godotenv"
@@ -15,8 +16,10 @@ func main() {
 		}
 	}
 
+	redis := config.SetupRedisDatabase()
+
 	port := os.Getenv("PORT")
 
-	r := router.SetupRouter()
+	r := router.SetupRouter(redis)
 	r.Run(":" + port)
 }

@@ -1,16 +1,26 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"path/filepath"
 
 	"smart-home-energy-management-server/internal/helper"
+	"smart-home-energy-management-server/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
 
-func UploadFileCSV(c *gin.Context) {
+type fileHandler struct {
+	fileService service.FileService
+}
+
+func NewFileHandler(fileService service.FileService) fileHandler {
+	return fileHandler{fileService}
+}
+
+func (h *fileHandler) UploadFileCSV(c *gin.Context) {
 	path := "./data"
 	absolutePath, _ := filepath.Abs(path)
 
@@ -58,10 +68,29 @@ func UploadFileCSV(c *gin.Context) {
 		return
 	}
 
+	jsonResult, err := json.Marshal(result)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	if err = h.fileService.SaveTable(string(jsonResult)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":     true,
 		"statusCode": 200,
 		"message":    "Upload table success",
-		"data":       result,
+		"data":       fileName,
 	})
 }

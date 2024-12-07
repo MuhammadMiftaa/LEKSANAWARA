@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 	"path/filepath"
+
 	"smart-home-energy-management-server/internal/helper"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,9 +36,20 @@ func UploadFileCSV(c *gin.Context) {
 	}
 
 	// Create file name with timestamp
-	fileName := time.Now().Format("20060102150405") + filepath.Ext(file.Filename)
+	fileName := "INPUT-TABLE" + filepath.Ext(file.Filename)
 	filePath := filepath.Join(absolutePath, fileName)
 	if err = c.SaveUploadedFile(file, filePath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	// Read CSV
+	result, err := helper.ReadCSV(absolutePath + "\\INPUT-TABLE.csv")
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":     false,
 			"statusCode": 500,
@@ -51,6 +62,6 @@ func UploadFileCSV(c *gin.Context) {
 		"status":     true,
 		"statusCode": 200,
 		"message":    "Upload table success",
-		"data":       filePath,
+		"data":       result,
 	})
 }

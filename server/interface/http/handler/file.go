@@ -101,7 +101,8 @@ func (h *fileHandler) UploadFileCSV(c *gin.Context) {
 
 func (h *fileHandler) Chat(c *gin.Context) {
 	// Mendapatkan URL dan Token dari environment variable
-	url := os.Getenv("HUGGINGFACE_API_URL")
+	tapasURL := os.Getenv("HUGGINGFACE_API_TAPAS_URL")
+	marianmtURL := os.Getenv("HUGGINGFACE_API_MARIANMT_URL")
 	token := os.Getenv("HUGGINGFACE_API_TOKEN")
 
 	var inputs struct {
@@ -131,68 +132,118 @@ func (h *fileHandler) Chat(c *gin.Context) {
 		return
 	}
 
-	// Membuat request ke Hugging Face API
-	headers := map[string]string{
-		"Authorization": "Bearer " + token,
-		"Content-Type":  "application/json",
-	}
-
-	body, err := json.Marshal(inputs)
+	// Membuat request ke Hugging Face API MarianMT untuk menerjemahkan query
+	marianmtBody, err := json.Marshal(map[string]string{"inputs": inputs.Query})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":     false,
 			"statusCode": 500,
-			"message":    err.Error() + " Error marshal body",
+			"message":    err.Error() + " Error marshal MarianMT body",
 		})
 		return
 	}
 
-	// Melakukan request ke Hugging Face API
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
+	// Membuat request untuk MarianMT API
+	marianmtReq, err := http.NewRequest("POST", marianmtURL, bytes.NewBuffer(marianmtBody))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":     false,
 			"statusCode": 500,
-			"message":    err.Error() + " Error create request",
+			"message":    err.Error() + " Error create MarianMT request",
 		})
 		return
 	}
 
-	for key, value := range headers {
-		req.Header.Set(key, value)
-	}
+	marianmtReq.Header.Set("Authorization", "Bearer "+token)
+	marianmtReq.Header.Set("Content-Type", "application/json")
 
-	// Mengirim request ke Hugging Face API
+	// Mengirim request ke MarianMT API untuk menerjemahkan query
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	marianmtResp, err := client.Do(marianmtReq)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":     false,
 			"statusCode": 500,
-			"message":    err.Error() + " Error do request",
+			"message":    err.Error() + " Error do MarianMT request",
 		})
 		return
 	}
-	defer resp.Body.Close()
+	defer marianmtResp.Body.Close()
 
-	// Decode response dari Hugging Face API
-	var result map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	// Decode response dari MarianMT (harus array of string)
+	var marianmtResult []map[string]interface{}
+	if err := json.NewDecoder(marianmtResp.Body).Decode(&marianmtResult); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":     false,
 			"statusCode": 500,
-			"message":    err.Error() + " Error decode response",
+			"data":       marianmtResult,
+			"message":    err.Error() + " Error decode MarianMT response",
 		})
 		return
 	}
 
+	// Ambil terjemahan query dari MarianMT response
+	translatedQuery := marianmtResult[0]["translation_text"].(string)
+
+	// Update inputs.Query dengan hasil terjemahan
+	inputs.Query = translatedQuery
+
+	// Membuat request ke Hugging Face API TAPAS
+	tapasBody, err := json.Marshal(inputs)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error() + " Error marshal TAPAS body",
+		})
+		return
+	}
+
+	// Membuat request ke TAPAS API
+	tapasReq, err := http.NewRequest("POST", tapasURL, bytes.NewBuffer(tapasBody))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error() + " Error create TAPAS request",
+		})
+		return
+	}
+
+	tapasReq.Header.Set("Authorization", "Bearer "+token)
+	tapasReq.Header.Set("Content-Type", "application/json")
+
+	// Mengirim request ke TAPAS API
+	tapasResp, err := client.Do(tapasReq)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error() + " Error do TAPAS request",
+		})
+		return
+	}
+	defer tapasResp.Body.Close()
+
+	// Decode response dari TAPAS
+	var tapasResult map[string]interface{}
+	if err := json.NewDecoder(tapasResp.Body).Decode(&tapasResult); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error() + " Error decode TAPAS response",
+		})
+		return
+	}
+
+	// Return hasil dari TAPAS API
 	c.JSON(http.StatusOK, gin.H{
 		"status":     true,
 		"statusCode": 200,
 		"message":    "Request to Hugging Face API successful",
-		"data": map[string]string{
+		"data": map[string]interface{}{
 			"question": inputs.Query,
-			"response": result["answer"].(string),
+			"answer":   tapasResult["answer"],
 		},
 	})
 }

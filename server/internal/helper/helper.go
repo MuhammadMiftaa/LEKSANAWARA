@@ -70,8 +70,9 @@ func ParseCSVtoSliceOfStruct(filePath string) ([]entity.ApplianceRequest, error)
 		return nil, err
 	}
 
-	// Menyimpan daftar appliance
+	// Menyimpan daftar appliance dan durasi untuk setiap device
 	var appliances []entity.ApplianceRequest
+	deviceDurations := make(map[string][]float64) // Menyimpan list durasi untuk setiap device name
 	seenNames := make(map[string]bool)
 
 	// Membaca setiap baris dalam file CSV
@@ -92,8 +93,15 @@ func ParseCSVtoSliceOfStruct(filePath string) ([]entity.ApplianceRequest, error)
 		if err != nil {
 			continue
 		}
+		duration, err := strconv.ParseFloat(record[7], 64) // Duration (Hours)
+		if err != nil {
+			continue
+		}
+
 		// Jika nama appliance sudah ada, lewati
 		if seenNames[deviceName] {
+			// Update list durasi untuk appliance yang sama
+			deviceDurations[deviceName] = append(deviceDurations[deviceName], duration)
 			continue
 		}
 
@@ -103,7 +111,7 @@ func ParseCSVtoSliceOfStruct(filePath string) ([]entity.ApplianceRequest, error)
 		// Tentukan apakah appliance memiliki prioritas (misalnya berdasarkan power > 500W)
 		priority := power > 500
 
-		// Tambahkan appliance ke slice
+		// Tambahkan appliance baru ke slice
 		appliance := entity.ApplianceRequest{
 			Name:     deviceName,
 			Priority: priority,
@@ -112,7 +120,26 @@ func ParseCSVtoSliceOfStruct(filePath string) ([]entity.ApplianceRequest, error)
 			Energy:   energy,
 		}
 
+		// Hitung rata-rata durasi untuk device yang pertama kali ditemukan
+		deviceDurations[deviceName] = append(deviceDurations[deviceName], duration)
+
+		// Tambahkan appliance ke slice
 		appliances = append(appliances, appliance)
+	}
+
+	// Tambahkan AverageUsage untuk setiap appliance
+	for i := range appliances {
+		deviceName := appliances[i].Name
+		durations := deviceDurations[deviceName]
+		if len(durations) > 0 {
+			// Hitung rata-rata durasi untuk appliance yang sesuai
+			var totalDuration float64
+			for _, d := range durations {
+				totalDuration += d
+			}
+			averageUsage := totalDuration / float64(len(durations))
+			appliances[i].AverageUsage = averageUsage
+		}
 	}
 
 	return appliances, nil

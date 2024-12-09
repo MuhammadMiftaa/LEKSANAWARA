@@ -24,11 +24,12 @@ func NewApplianceService(applianceRepo repository.ApplianceRepository) Appliance
 
 func (s *applianceService) CreateAppliance(applianceReq *entity.ApplianceRequest) (*entity.Appliance, error) {
 	appliance := &entity.Appliance{
-		Name:     applianceReq.Name,
-		Priority: applianceReq.Priority,
-		Location: applianceReq.Location,
-		Power:    applianceReq.Power,
-		Energy:   applianceReq.Energy,
+		Name:         applianceReq.Name,
+		Priority:     applianceReq.Priority,
+		Location:     applianceReq.Location,
+		Power:        applianceReq.Power,
+		Energy:       applianceReq.Energy,
+		AverageUsage: applianceReq.AverageUsage,
 	}
 	return s.applianceRepo.Create(appliance)
 }

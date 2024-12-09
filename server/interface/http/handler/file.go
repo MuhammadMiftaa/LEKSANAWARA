@@ -15,11 +15,12 @@ import (
 )
 
 type fileHandler struct {
+	applianceService service.ApplianceService
 	fileService service.FileService
 }
 
-func NewFileHandler(fileService service.FileService) fileHandler {
-	return fileHandler{fileService}
+func NewFileHandler(applianceService service.ApplianceService, fileService service.FileService) fileHandler {
+	return fileHandler{applianceService: applianceService, fileService: fileService}
 }
 
 func (h *fileHandler) UploadFileCSV(c *gin.Context) {
@@ -133,6 +134,7 @@ func (h *fileHandler) Chat(c *gin.Context) {
 	}
 
 	// Membuat request ke Hugging Face API MarianMT untuk menerjemahkan query
+	question := inputs.Query
 	marianmtBody, err := json.Marshal(map[string]string{"inputs": inputs.Query})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -242,7 +244,7 @@ func (h *fileHandler) Chat(c *gin.Context) {
 		"statusCode": 200,
 		"message":    "Request to Hugging Face API successful",
 		"data": map[string]interface{}{
-			"question": inputs.Query,
+			"question": question,
 			"answer":   tapasResult["answer"],
 		},
 	})

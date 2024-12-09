@@ -6,9 +6,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	"gorm.io/gorm"
 )
 
-func SetupRouter(redis *redis.Client) *gin.Engine {
+func SetupRouter(psql *gorm.DB, redis *redis.Client) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(middleware.CORSMiddleware())
@@ -20,7 +21,7 @@ func SetupRouter(redis *redis.Client) *gin.Engine {
 	})
 
 	v1 := router.Group("/v1")
-	routes.FileRoutes(v1, redis)
+	routes.FileRoutes(v1, psql, redis)
 
 	return router
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+
 	"smart-home-energy-management-server/config"
 	"smart-home-energy-management-server/interface/http/router"
 
@@ -16,10 +17,15 @@ func main() {
 		}
 	}
 
+	psql, err := config.SetupDatabase()
 	redis := config.SetupRedisDatabase()
+
+	if err != nil {
+		log.Fatalf("Error connecting to database: %v", err)
+	}
 
 	port := os.Getenv("PORT")
 
-	r := router.SetupRouter(redis)
+	r := router.SetupRouter(psql, redis)
 	r.Run(":" + port)
 }

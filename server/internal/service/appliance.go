@@ -6,11 +6,12 @@ import (
 )
 
 type ApplianceService interface {
-	CreateAppliance(appliance *entity.Appliance) (*entity.Appliance, error)
+	CreateAppliance(appliance *entity.ApplianceRequest) (*entity.Appliance, error)
 	GetAllAppliances() ([]entity.Appliance, error)
 	GetApplianceByID(id uint) (*entity.Appliance, error)
 	UpdateApplianceByID(id uint, appliance *entity.Appliance) (*entity.Appliance, error)
 	DeleteApplianceByID(id uint) error
+	TruncateAppliances() error
 }
 
 type applianceService struct {
@@ -21,7 +22,14 @@ func NewApplianceService(applianceRepo repository.ApplianceRepository) Appliance
 	return &applianceService{applianceRepo: applianceRepo}
 }
 
-func (s *applianceService) CreateAppliance(appliance *entity.Appliance) (*entity.Appliance, error) {
+func (s *applianceService) CreateAppliance(applianceReq *entity.ApplianceRequest) (*entity.Appliance, error) {
+	appliance := &entity.Appliance{
+		Name:     applianceReq.Name,
+		Priority: applianceReq.Priority,
+		Location: applianceReq.Location,
+		Power:    applianceReq.Power,
+		Energy:   applianceReq.Energy,
+	}
 	return s.applianceRepo.Create(appliance)
 }
 
@@ -41,3 +49,6 @@ func (s *applianceService) DeleteApplianceByID(id uint) error {
 	return s.applianceRepo.DeleteByID(id)
 }
 
+func (s *applianceService) TruncateAppliances() error {
+	return s.applianceRepo.Truncate()
+}

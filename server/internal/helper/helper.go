@@ -3,6 +3,9 @@ package helper
 import (
 	"encoding/csv"
 	"os"
+	"strconv"
+
+	"smart-home-energy-management-server/internal/entity"
 )
 
 func StorageIsExist(path string) error {
@@ -49,4 +52,68 @@ func ReadCSV(filePath string) (map[string][]string, error) {
 	}
 
 	return result, nil
+}
+
+func ParseCSVtoSliceOfStruct(filePath string) ([]entity.ApplianceRequest, error) {
+	// Buka file CSV
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	// Membaca file CSV
+	reader := csv.NewReader(file)
+	// Membaca header
+	_, err = reader.Read()
+	if err != nil {
+		return nil, err
+	}
+
+	// Menyimpan daftar appliance
+	var appliances []entity.ApplianceRequest
+	seenNames := make(map[string]bool)
+
+	// Membaca setiap baris dalam file CSV
+	for {
+		record, err := reader.Read()
+		if err != nil {
+			break
+		}
+		// Ambil data dari baris CSV
+		deviceName := record[1]
+		location := record[3]
+
+		power, err := strconv.Atoi(record[4])
+		if err != nil {
+			continue
+		}
+		energy, err := strconv.ParseFloat(record[8], 64)
+		if err != nil {
+			continue
+		}
+		// Jika nama appliance sudah ada, lewati
+		if seenNames[deviceName] {
+			continue
+		}
+
+		// Tandai nama appliance sudah ada
+		seenNames[deviceName] = true
+
+		// Tentukan apakah appliance memiliki prioritas (misalnya berdasarkan power > 500W)
+		priority := power > 500
+
+		// Tambahkan appliance ke slice
+		appliance := entity.ApplianceRequest{
+			Name:     deviceName,
+			Priority: priority,
+			Location: location,
+			Power:    power,
+			Energy:   energy,
+		}
+
+		appliances = append(appliances, appliance)
+	}
+
+	return appliances, nil
 }

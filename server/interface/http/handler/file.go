@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
 
+	"smart-home-energy-management-server/internal/entity"
 	"smart-home-energy-management-server/internal/helper"
 	"smart-home-energy-management-server/internal/service"
 
@@ -16,7 +18,7 @@ import (
 
 type fileHandler struct {
 	applianceService service.ApplianceService
-	fileService service.FileService
+	fileService      service.FileService
 }
 
 func NewFileHandler(applianceService service.ApplianceService, fileService service.FileService) fileHandler {
@@ -62,12 +64,51 @@ func (h *fileHandler) UploadFileCSV(c *gin.Context) {
 	}
 
 	// Membaca file CSV
-	result, err := helper.ReadCSV(absolutePath + "\\INPUT-TABLE.csv")
+	result, err := helper.ReadCSV(filepath.Join(absolutePath, "INPUT-TABLE.csv"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":     false,
 			"statusCode": 500,
 			"message":    err.Error(),
+		})
+		return
+	}
+
+	appliances, err := helper.ParseCSVtoSliceOfStruct(filepath.Join(absolutePath, "INPUT-TABLE.csv"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	var wg sync.WaitGroup
+	var errors []string
+	var mu sync.Mutex
+
+	h.applianceService.TruncateAppliances()
+	for i := 0; i < len(appliances); i++ {
+		wg.Add(1)
+		go func(appliance entity.ApplianceRequest) {
+			defer wg.Done()
+			_, err := h.applianceService.CreateAppliance(&appliance)
+			if err != nil {
+				mu.Lock()
+				errors = append(errors, err.Error())
+				mu.Unlock()
+			}
+		}(appliances[i])
+	}
+
+	wg.Wait()
+
+	if len(errors) > 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    errors,
 		})
 		return
 	}

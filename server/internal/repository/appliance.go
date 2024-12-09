@@ -12,6 +12,7 @@ type ApplianceRepository interface {
 	FindByID(id uint) (*entity.Appliance, error)
 	UpdateByID(id uint, appliance *entity.Appliance) (*entity.Appliance, error)
 	DeleteByID(id uint) error
+    Truncate() error
 }
 
 type applianceRepository struct {
@@ -57,4 +58,11 @@ func (r *applianceRepository) DeleteByID(id uint) error {
 		return err
 	}
 	return nil
+}
+
+func (r *applianceRepository) Truncate() error {
+    if err := r.db.Exec("TRUNCATE TABLE appliances").Error; err != nil {
+        return err
+    }
+    return nil
 }

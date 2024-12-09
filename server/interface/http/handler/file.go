@@ -290,3 +290,39 @@ func (h *fileHandler) Chat(c *gin.Context) {
 		},
 	})
 }
+
+func (h *fileHandler) GenerateRecommendations(c *gin.Context) {
+	var userInputs struct {
+		Golongan   string  `json:"golongan"` // INPUT
+		Tarif      float64 `json:"tarif"`
+		MaksBiaya  float64 `json:"maks_biaya"` // INPUT
+		MaksEnergi float64 `json:"maks_energi"`
+		Tanggal    string  `json:"tanggal"` // INPUT
+		Hari       int     `json:"hari"`
+	}
+
+	err := c.ShouldBindJSON(&userInputs)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":     false,
+			"statusCode": 400,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	userInputs.Tarif = helper.GetTarif(userInputs.Golongan)
+	userInputs.MaksEnergi = userInputs.MaksBiaya / userInputs.Tarif
+	userInputs.Hari, _ = helper.JumlahHariDalamBulan(userInputs.Tanggal)
+	appliances, err := h.applianceService.GetAllAppliances()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	helper.PrintRecommendations(appliances, userInputs.Tarif, userInputs.Hari, userInputs.MaksEnergi)
+}

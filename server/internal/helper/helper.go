@@ -2,8 +2,11 @@ package helper
 
 import (
 	"encoding/csv"
+	"fmt"
 	"os"
+	"sort"
 	"strconv"
+	"time"
 
 	"smart-home-energy-management-server/internal/entity"
 )
@@ -143,4 +146,108 @@ func ParseCSVtoSliceOfStruct(filePath string) ([]entity.ApplianceRequest, error)
 	}
 
 	return appliances, nil
+}
+
+func GetTarif(golongan string) float64 {
+	switch golongan {
+	case "Subsidi daya 450 VA":
+		return 415.00
+	case "Subsidi daya 900 VA":
+		return 605.00
+	case "R-1/TR daya 900 VA":
+		return 1352.00
+	case "R-1/TR daya 1300 VA":
+		return 1444.70
+	case "R-1/TR daya 2200 VA":
+		return 1444.70
+	case "R-2/TR daya 3500 VA - 5500 VA":
+		return 1699.53
+	case "R-3/TR daya 6600 VA ke atas":
+		return 1699.53
+	case "B-2/TR daya 6600 VA - 200 kVA":
+		return 1444.70
+	case "B-3/TM daya di atas 200 kVA":
+		return 1114.74
+	case "I-3/TM daya di atas 200 kVA":
+		return 1114.74
+	case "I-4/TT daya 30.000 kVA ke atas":
+		return 996.74
+	case "P-1/TR daya 6600 VA - 200 kVA":
+		return 1699.53
+	case "P-2/TM daya di atas 200 kVA":
+		return 1522.88
+	case "P-3/TR penerangan jalan umum":
+		return 1699.53
+	case "L/TR", "L/TM", "L/TT":
+		return 1644.00
+	default:
+		return -1
+	}
+}
+
+func JumlahHariDalamBulan(tanggal string) (int, error) {
+	// Parsing string tanggal ke tipe time.Time
+	t, err := time.Parse("2006-01-02", tanggal)
+	if err != nil {
+		return 0, err
+	}
+
+	// Mendapatkan tahun dan bulan dari tanggal
+	tahun := t.Year()
+	bulan := t.Month()
+
+	// Menghitung jumlah hari di bulan tersebut
+	// time.Date(tahun, bulan+1, 0, 0, 0, 0, 0, time.UTC) akan menghasilkan tanggal terakhir bulan tersebut
+	hariTerakhir := time.Date(tahun, bulan+1, 0, 0, 0, 0, 0, time.UTC)
+
+	// Mengembalikan jumlah hari di bulan tersebut
+	return hariTerakhir.Day(), nil
+}
+
+func PrintRecommendations(appliances []entity.ApplianceResponse, tarif float64, daysInMonth int, maxEnergy float64) {
+	// debugging parameter
+
+	timeSlots := []string{"00:00–06:00", "06:00–12:00", "12:00–18:00", "18:00–24:00"}
+
+	// Hitung total energi bulanan dan biaya untuk setiap appliance
+	for i := range appliances {
+		appliances[i].MonthlyUse = appliances[i].Energy * appliances[i].AverageUsage * float64(daysInMonth)
+		appliances[i].Cost = appliances[i].MonthlyUse * tarif
+	}
+
+	// Urutkan appliances berdasarkan Priority (true dulu), lalu energi rendah
+	sort.Slice(appliances, func(i, j int) bool {
+		if appliances[i].Priority == appliances[j].Priority {
+			return appliances[i].MonthlyUse < appliances[j].MonthlyUse
+		}
+		return appliances[i].Priority
+	})
+
+	// Penjadwalan appliances dengan batas energi
+	allocatedEnergy := 0.0
+	selectedAppliances := []entity.ApplianceResponse{}
+
+	for _, appliance := range appliances {
+		if allocatedEnergy+appliance.MonthlyUse <= maxEnergy {
+			allocatedEnergy += appliance.MonthlyUse
+			appliance.RecommendedSchedule = recommendSchedule(appliance.AverageUsage, timeSlots)
+			selectedAppliances = append(selectedAppliances, appliance)
+		}
+	}
+
+	// Cetak jadwal appliances
+	fmt.Printf("Jadwal Penggunaan Appliances (Total Energi = %.2f kWh, Biaya = Rp%.2f):\n", allocatedEnergy, allocatedEnergy*tarif)
+	for _, appliance := range selectedAppliances {
+		fmt.Printf("Name: %s, Priority: %t, Monthly Use: %.2f kWh, Cost: Rp%.2f, Schedule: %v\n",
+			appliance.Name, appliance.Priority, appliance.MonthlyUse, appliance.Cost, appliance.RecommendedSchedule)
+	}
+}
+
+func recommendSchedule(dailyUse float64, timeSlots []string) []string {
+	recommended := []string{}
+	slotCount := int(dailyUse / 2.0) // Setiap slot = 2 jam
+	for i := 0; i < slotCount && i < len(timeSlots); i++ {
+		recommended = append(recommended, timeSlots[i])
+	}
+	return recommended
 }

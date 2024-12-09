@@ -7,7 +7,7 @@ import (
 
 type ApplianceService interface {
 	CreateAppliance(appliance *entity.ApplianceRequest) (*entity.Appliance, error)
-	GetAllAppliances() ([]entity.Appliance, error)
+	GetAllAppliances() ([]entity.ApplianceResponse, error)
 	GetApplianceByID(id uint) (*entity.Appliance, error)
 	UpdateApplianceByID(id uint, appliance *entity.Appliance) (*entity.Appliance, error)
 	DeleteApplianceByID(id uint) error
@@ -34,8 +34,29 @@ func (s *applianceService) CreateAppliance(applianceReq *entity.ApplianceRequest
 	return s.applianceRepo.Create(appliance)
 }
 
-func (s *applianceService) GetAllAppliances() ([]entity.Appliance, error) {
-	return s.applianceRepo.FindAll()
+func (s *applianceService) GetAllAppliances() ([]entity.ApplianceResponse, error) {
+	appliances, err := s.applianceRepo.FindAll()
+	if err != nil {
+		return nil, err
+	}
+
+	var result []entity.ApplianceResponse
+	for _, appliance := range appliances {
+		result = append(result, entity.ApplianceResponse{
+			ID:                  appliance.ID,
+			Name:                appliance.Name,
+			Priority:            appliance.Priority,
+			Location:            appliance.Location,
+			Power:               appliance.Power,
+			Energy:              appliance.Energy,
+			AverageUsage:        appliance.AverageUsage,
+			MonthlyUse:          appliance.MonthlyUse,
+			Cost:                appliance.Cost,
+			RecommendedSchedule: appliance.RecommendedSchedule,
+		})
+	}
+
+	return result, nil
 }
 
 func (s *applianceService) GetApplianceByID(id uint) (*entity.Appliance, error) {

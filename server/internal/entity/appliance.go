@@ -1,6 +1,8 @@
 package entity
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Appliance struct {
 	gorm.Model
@@ -10,9 +12,6 @@ type Appliance struct {
 	Power               int
 	Energy              float64
 	AverageUsage        float64
-	MonthlyUse          float64
-	Cost                float64
-	RecommendedSchedule []string
 }
 
 type ApplianceRequest struct {

@@ -22,4 +22,5 @@ func FileRoutes(version *gin.RouterGroup, psql *gorm.DB, redis *redis.Client) {
 
 	version.POST("/upload", fileHandler.UploadFileCSV)
 	version.POST("/chat", fileHandler.Chat)
+	version.POST("/generate-recommendations", fileHandler.GenerateRecommendations)
 }

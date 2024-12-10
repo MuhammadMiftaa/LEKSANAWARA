@@ -86,7 +86,6 @@ func ParseCSVtoSliceOfStruct(filePath string) ([]entity.ApplianceRequest, error)
 		}
 		// Ambil data dari baris CSV
 		deviceName := record[1]
-		location := record[3]
 
 		power, err := strconv.Atoi(record[4])
 		if err != nil {
@@ -97,6 +96,10 @@ func ParseCSVtoSliceOfStruct(filePath string) ([]entity.ApplianceRequest, error)
 			continue
 		}
 		duration, err := strconv.ParseFloat(record[7], 64) // Duration (Hours)
+		if err != nil {
+			continue
+		}
+		cost, err := strconv.ParseFloat(record[9], 64)
 		if err != nil {
 			continue
 		}
@@ -116,11 +119,15 @@ func ParseCSVtoSliceOfStruct(filePath string) ([]entity.ApplianceRequest, error)
 
 		// Tambahkan appliance baru ke slice
 		appliance := entity.ApplianceRequest{
-			Name:     deviceName,
-			Priority: priority,
-			Location: location,
-			Power:    power,
-			Energy:   energy,
+			Name:         deviceName,
+			Type:         record[2],
+			Location:     record[3],
+			Power:        power,
+			Energy:       energy,
+			Cost:         cost,
+			Status:       record[10],
+			Connectivity: record[11],
+			Priority:     priority,
 		}
 
 		// Hitung rata-rata durasi untuk device yang pertama kali ditemukan

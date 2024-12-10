@@ -13,11 +13,11 @@ type FileService interface {
 }
 
 type fileService struct {
-	FileRepository repository.FileRepository
+	RedisRepository repository.RedisRepository
 }
 
-func NewFileService(fileRepository repository.FileRepository) FileService {
-	return &fileService{fileRepository}
+func NewFileService(redisRepository repository.RedisRepository) FileService {
+	return &fileService{redisRepository}
 }
 
 func (s *fileService) SaveTable(table string) error {
@@ -25,11 +25,11 @@ func (s *fileService) SaveTable(table string) error {
 		return errors.New("table is empty")
 	}
 
-	return s.FileRepository.SaveTable(table)
+	return s.RedisRepository.Save("table", table)
 }
 
 func (s *fileService) GetTable() (map[string][]string, error) {
-	table, err := s.FileRepository.GetTable()
+	table, err := s.RedisRepository.Get("table")
 	if err != nil {
 		return nil, err
 	}

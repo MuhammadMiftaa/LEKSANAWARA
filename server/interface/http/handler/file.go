@@ -17,12 +17,17 @@ import (
 )
 
 type fileHandler struct {
-	applianceService service.ApplianceService
-	fileService      service.FileService
+	applianceService      service.ApplianceService
+	fileService           service.FileService
+	recommendationService service.RecommendationService
 }
 
-func NewFileHandler(applianceService service.ApplianceService, fileService service.FileService) fileHandler {
-	return fileHandler{applianceService: applianceService, fileService: fileService}
+func NewFileHandler(applianceService service.ApplianceService, fileService service.FileService, recommendationService service.RecommendationService) fileHandler {
+	return fileHandler{
+		applianceService:      applianceService,
+		fileService:           fileService,
+		recommendationService: recommendationService,
+	}
 }
 
 func (h *fileHandler) UploadFileCSV(c *gin.Context) {
@@ -324,5 +329,21 @@ func (h *fileHandler) GenerateRecommendations(c *gin.Context) {
 		return
 	}
 
-	helper.PrintRecommendations(appliances, userInputs.Tarif, userInputs.Hari, userInputs.MaksEnergi)
+	result := helper.PrintRecommendations(appliances, userInputs.Tarif, userInputs.Hari, userInputs.MaksEnergi)
+
+	if err = h.recommendationService.SaveRecommendation(result); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":     true,
+		"statusCode": 200,
+		"message":    "Recommendations generated",
+		"data":       result,
+	})
 }

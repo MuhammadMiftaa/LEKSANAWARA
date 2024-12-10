@@ -50,9 +50,6 @@ func (s *applianceService) GetAllAppliances() ([]entity.ApplianceResponse, error
 			Power:               appliance.Power,
 			Energy:              appliance.Energy,
 			AverageUsage:        appliance.AverageUsage,
-			MonthlyUse:          appliance.MonthlyUse,
-			Cost:                appliance.Cost,
-			RecommendedSchedule: appliance.RecommendedSchedule,
 		})
 	}
 

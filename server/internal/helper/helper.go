@@ -204,9 +204,7 @@ func JumlahHariDalamBulan(tanggal string) (int, error) {
 	return hariTerakhir.Day(), nil
 }
 
-func PrintRecommendations(appliances []entity.ApplianceResponse, tarif float64, daysInMonth int, maxEnergy float64) {
-	// debugging parameter
-
+func PrintRecommendations(appliances []entity.ApplianceResponse, tarif float64, daysInMonth int, maxEnergy float64) []string {
 	timeSlots := []string{"00:00–06:00", "06:00–12:00", "12:00–18:00", "18:00–24:00"}
 
 	// Hitung total energi bulanan dan biaya untuk setiap appliance
@@ -236,11 +234,14 @@ func PrintRecommendations(appliances []entity.ApplianceResponse, tarif float64, 
 	}
 
 	// Cetak jadwal appliances
-	fmt.Printf("Jadwal Penggunaan Appliances (Total Energi = %.2f kWh, Biaya = Rp%.2f):\n", allocatedEnergy, allocatedEnergy*tarif)
+	result := []string{}
+	result = append(result, fmt.Sprintf("Jadwal Penggunaan Appliances (Total Energi = %.2f kWh, Biaya = Rp%.2f):", allocatedEnergy, allocatedEnergy*tarif))
 	for _, appliance := range selectedAppliances {
-		fmt.Printf("Name: %s, Priority: %t, Monthly Use: %.2f kWh, Cost: Rp%.2f, Schedule: %v\n",
-			appliance.Name, appliance.Priority, appliance.MonthlyUse, appliance.Cost, appliance.RecommendedSchedule)
+		result = append(result, fmt.Sprintf("Name: %s, Priority: %t, Monthly Use: %.2f kWh, Cost: Rp%.2f, Schedule: %v",
+			appliance.Name, appliance.Priority, appliance.MonthlyUse, appliance.Cost, appliance.RecommendedSchedule))
 	}
+
+	return result
 }
 
 func recommendSchedule(dailyUse float64, timeSlots []string) []string {

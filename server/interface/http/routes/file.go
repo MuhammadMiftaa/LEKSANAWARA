@@ -12,13 +12,14 @@ import (
 
 func FileRoutes(version *gin.RouterGroup, psql *gorm.DB, redis *redis.Client) {
 
-	fileRepository := repository.NewFileRepository(redis)
-	fileService := service.NewFileService(fileRepository)
+	redisRepository := repository.NewRedisRepository(redis)
+	fileService := service.NewFileService(redisRepository)
+	recommendationService := service.NewRecommendationService(redisRepository)
 
-	appliaceRepository := repository.NewApplianceRepository(psql)
-	applianceService := service.NewApplianceService(appliaceRepository)
+	applianceRepository := repository.NewApplianceRepository(psql)
+	applianceService := service.NewApplianceService(applianceRepository)
 
-	fileHandler := handler.NewFileHandler(applianceService, fileService)
+	fileHandler := handler.NewFileHandler(applianceService, fileService, recommendationService)
 
 	version.POST("/upload", fileHandler.UploadFileCSV)
 	version.POST("/chat", fileHandler.Chat)

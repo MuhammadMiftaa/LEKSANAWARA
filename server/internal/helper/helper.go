@@ -148,6 +148,7 @@ func ParseCSVtoSliceOfStruct(filePath string) ([]entity.ApplianceRequest, error)
 				totalDuration += d
 			}
 			averageUsage := totalDuration / float64(len(durations))
+			appliances[i].UsageToday = totalDuration
 			appliances[i].AverageUsage = averageUsage
 		}
 	}
@@ -211,7 +212,7 @@ func JumlahHariDalamBulan(tanggal string) (int, error) {
 	return hariTerakhir.Day(), nil
 }
 
-func PrintRecommendations(appliances []entity.ApplianceResponse, tarif float64, daysInMonth int, maxEnergy float64) []string {
+func PrintRecommendationsMonthlyUsage(appliances []entity.ApplianceResponse, tarif float64, daysInMonth int, maxEnergy float64) []string {
 	timeSlots := []string{"00:00–06:00", "06:00–12:00", "12:00–18:00", "18:00–24:00"}
 
 	// Hitung total energi bulanan dan biaya untuk setiap appliance
@@ -235,7 +236,7 @@ func PrintRecommendations(appliances []entity.ApplianceResponse, tarif float64, 
 	for _, appliance := range appliances {
 		if allocatedEnergy+appliance.MonthlyUse <= maxEnergy {
 			allocatedEnergy += appliance.MonthlyUse
-			appliance.RecommendedSchedule = recommendSchedule(appliance.AverageUsage, timeSlots)
+			appliance.RecommendedSchedule = RecommendationsMonthlyUsage(appliance.AverageUsage, timeSlots)
 			selectedAppliances = append(selectedAppliances, appliance)
 		}
 	}
@@ -251,11 +252,59 @@ func PrintRecommendations(appliances []entity.ApplianceResponse, tarif float64, 
 	return result
 }
 
-func recommendSchedule(dailyUse float64, timeSlots []string) []string {
+func RecommendationsMonthlyUsage(dailyUse float64, timeSlots []string) []string {
 	recommended := []string{}
 	slotCount := int(dailyUse / 2.0) // Setiap slot = 2 jam
 	for i := 0; i < slotCount && i < len(timeSlots); i++ {
 		recommended = append(recommended, timeSlots[i])
 	}
 	return recommended
+}
+
+func PrintRecommendationsDailyUsage(appliances []entity.ApplianceResponse, tariff float64) []DailySummary {
+	var summary []DailySummary
+	for _, appliance := range appliances {
+		// Hitung energi yang dikonsumsi saat ini
+		currentEnergy := float64(appliance.Power) * appliance.UsageToday / 1000.0 // kWh
+		// Biaya penggunaan saat ini
+		currentCost := currentEnergy * tariff
+
+		// Periksa apakah penggunaan melebihi target harian
+		var applianceSummary DailySummary
+		if appliance.UsageToday > appliance.DailyUseTarget {
+			applianceSummary.ApplianceName = appliance.Name
+			applianceSummary.Message = fmt.Sprintf("WARNING: %s telah melebihi target harian!", appliance.Name)
+			applianceSummary.IsOveruse = true
+		} else {
+			applianceSummary.ApplianceName = appliance.Name
+			applianceSummary.Message = fmt.Sprintf("%s dalam batas target harian. (Penggunaan: %.2f jam, Target: %.2f jam)", appliance.Name, appliance.UsageToday, appliance.DailyUseTarget)
+			applianceSummary.IsOveruse = false
+		}
+
+		// Cetak informasi biaya
+		applianceSummary.Usage = appliance.UsageToday
+		applianceSummary.Target = appliance.DailyUseTarget
+		applianceSummary.Info = fmt.Sprintf("Biaya saat ini untuk %s: IDR %.2f", appliance.Name, currentCost)
+		summary = append(summary, applianceSummary)
+	}
+
+	return summary
+}
+
+func RecommendationsDailyUsage(appliance entity.ApplianceResponse, hoursRemaining, tariff float64) (string, []string) {
+	if appliance.Priority {
+		var result []string
+		result = append(result, fmt.Sprintf("Rekomendasi untuk %s", appliance.Name))
+		result = append(result, "PRIORITAS TINGGI: Perangkat ini penting untuk aktivitas sehari-hari.")
+		result = append(result, fmt.Sprintf("Gunakan selama %.2f jam lagi hari ini untuk memenuhi kebutuhan harian tanpa melebihi batas target harian sebesar %.2f jam.", hoursRemaining, appliance.DailyUseTarget))
+		result = append(result, fmt.Sprintf("Estimasi biaya tambahan jika digunakan selama %.2f jam: IDR %.2f", hoursRemaining, float64(appliance.Power)*hoursRemaining/1000*tariff))
+		return appliance.Name, result
+	} else {
+		var result []string
+		result = append(result, fmt.Sprintf("Rekomendasi untuk %s", appliance.Name))
+		result = append(result, "PRIORITAS RENDAH: Perangkat ini tidak mendesak. Pertimbangkan untuk membatasi penggunaannya.")
+		result = append(result, fmt.Sprintf("Kurangi penggunaannya agar tidak melebihi target harian %.2f jam.", appliance.DailyUseTarget))
+		result = append(result, fmt.Sprintf("Potensi penghematan jika perangkat ini tidak digunakan lagi hari ini: IDR %.2f", float64(appliance.Power)*hoursRemaining/1000*tariff))
+		return appliance.Name, result
+	}
 }

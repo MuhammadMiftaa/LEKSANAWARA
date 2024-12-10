@@ -48,18 +48,19 @@ func (s *applianceService) GetAllAppliances() ([]entity.ApplianceResponse, error
 	var result []entity.ApplianceResponse
 	for _, appliance := range appliances {
 		result = append(result, entity.ApplianceResponse{
-			ID:           appliance.ID,
-			Name:         appliance.Name,
-			Type:         appliance.Type,
-			Location:     appliance.Location,
-			Power:        appliance.Power,
-			Energy:       appliance.Energy,
-			Cost:         appliance.Cost,
-			Status:       appliance.Status,
-			Connectivity: appliance.Connectivity,
-			Priority:     appliance.Priority,
-			UsageToday:   appliance.UsageToday,
-			AverageUsage: appliance.AverageUsage,
+			ID:             appliance.ID,
+			Name:           appliance.Name,
+			Type:           appliance.Type,
+			Location:       appliance.Location,
+			Power:          appliance.Power,
+			UsageToday:     appliance.UsageToday,
+			Energy:         appliance.Energy,
+			Cost:           appliance.Cost,
+			Status:         appliance.Status,
+			Connectivity:   appliance.Connectivity,
+			AverageUsage:   appliance.AverageUsage,
+			DailyUseTarget: appliance.DailyUseTarget,
+			Priority:       appliance.Priority,
 		})
 	}
 

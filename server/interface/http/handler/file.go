@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -296,7 +297,7 @@ func (h *fileHandler) Chat(c *gin.Context) {
 	})
 }
 
-func (h *fileHandler) GenerateRecommendations(c *gin.Context) {
+func (h *fileHandler) GenerateMonthlyRecommendations(c *gin.Context) {
 	var userInputs struct {
 		Golongan   string  `json:"golongan"` // INPUT
 		Tarif      float64 `json:"tarif"`
@@ -329,7 +330,7 @@ func (h *fileHandler) GenerateRecommendations(c *gin.Context) {
 		return
 	}
 
-	result := helper.PrintRecommendations(appliances, userInputs.Tarif, userInputs.Hari, userInputs.MaksEnergi)
+	result := helper.PrintRecommendationsMonthlyUsage(appliances, userInputs.Tarif, userInputs.Hari, userInputs.MaksEnergi)
 
 	if err = h.recommendationService.SaveRecommendation(result); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -345,5 +346,61 @@ func (h *fileHandler) GenerateRecommendations(c *gin.Context) {
 		"statusCode": 200,
 		"message":    "Recommendations generated",
 		"data":       result,
+	})
+}
+
+func (h *fileHandler) GenerateDailyRecommendations(c *gin.Context) {
+	var userInputs struct {
+		Golongan string  `json:"golongan"` // INPUT
+		Tarif    float64 `json:"tarif"`
+	}
+
+	err := c.ShouldBindJSON(&userInputs)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":     false,
+			"statusCode": 400,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	userInputs.Tarif = helper.GetTarif(userInputs.Golongan)
+
+	appliances, err := h.applianceService.GetAllAppliances()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	analysisResult := helper.PrintRecommendationsDailyUsage(appliances, userInputs.Tarif)
+
+	// Rekomendasi penggunaan
+	var recommendation []helper.Recommendations
+	for _, appliance := range appliances {
+		var result helper.Recommendations
+
+		hoursRemaining := math.Max(0, appliance.DailyUseTarget-appliance.UsageToday)
+		if hoursRemaining > 0 {
+			result.Name, result.Message = helper.RecommendationsDailyUsage(appliance, hoursRemaining, userInputs.Tarif)
+			recommendation = append(recommendation, result)
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":     true,
+		"statusCode": 200,
+		"message":    "Recommendations generated",
+		"data": struct {
+			AnalysisResult []helper.DailySummary `json:"analysis-result"`
+			Recommendation []helper.Recommendations `json:"recommendation"`
+		}{
+			AnalysisResult: analysisResult,
+			Recommendation: recommendation,
+		},
 	})
 }

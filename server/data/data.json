@@ -1,0 +1,119 @@
+{
+    "data": {
+        "analysis-result": [
+            {
+                "ApplianceName": "Setrika",
+                "Message": "WARNING: Setrika telah melebihi target harian!",
+                "Info": "Biaya saat ini untuk Setrika: IDR 17740.92",
+                "IsOveruse": true,
+                "Usage": 30.7,
+                "Target": 24
+            },
+            {
+                "ApplianceName": "Kulkas",
+                "Message": "Kulkas dalam batas target harian. (Penggunaan: 34.99 jam, Target: 36.00 jam)",
+                "Info": "Biaya saat ini untuk Kulkas: IDR 5055.01",
+                "IsOveruse": false,
+                "Usage": 34.99,
+                "Target": 36
+            },
+            {
+                "ApplianceName": "TV",
+                "Message": "WARNING: TV telah melebihi target harian!",
+                "Info": "Biaya saat ini untuk TV: IDR 9027.93",
+                "IsOveruse": true,
+                "Usage": 41.66,
+                "Target": 36
+            },
+            {
+                "ApplianceName": "Komputer",
+                "Message": "Komputer dalam batas target harian. (Penggunaan: 34.21 jam, Target: 36.00 jam)",
+                "Info": "Biaya saat ini untuk Komputer: IDR 9884.64",
+                "IsOveruse": false,
+                "Usage": 34.21000000000001,
+                "Target": 36
+            },
+            {
+                "ApplianceName": "Microwave",
+                "Message": "WARNING: Microwave telah melebihi target harian!",
+                "Info": "Biaya saat ini untuk Microwave: IDR 43153.19",
+                "IsOveruse": true,
+                "Usage": 29.869999999999997,
+                "Target": 24
+            },
+            {
+                "ApplianceName": "Lampu Ruang Tamu",
+                "Message": "WARNING: Lampu Ruang Tamu telah melebihi target harian!",
+                "Info": "Biaya saat ini untuk Lampu Ruang Tamu: IDR 1260.36",
+                "IsOveruse": true,
+                "Usage": 43.62,
+                "Target": 36
+            },
+            {
+                "ApplianceName": "Lampu Dapur",
+                "Message": "Lampu Dapur dalam batas target harian. (Penggunaan: 31.11 jam, Target: 36.00 jam)",
+                "Info": "Biaya saat ini untuk Lampu Dapur: IDR 674.17",
+                "IsOveruse": false,
+                "Usage": 31.11,
+                "Target": 36
+            },
+            {
+                "ApplianceName": "Mesin Cuci",
+                "Message": "Mesin Cuci dalam batas target harian. (Penggunaan: 31.32 jam, Target: 36.00 jam)",
+                "Info": "Biaya saat ini untuk Mesin Cuci: IDR 22624.00",
+                "IsOveruse": false,
+                "Usage": 31.32,
+                "Target": 36
+            },
+            {
+                "ApplianceName": "AC Kamar",
+                "Message": "WARNING: AC Kamar telah melebihi target harian!",
+                "Info": "Biaya saat ini untuk AC Kamar: IDR 73090.26",
+                "IsOveruse": true,
+                "Usage": 42.16,
+                "Target": 36
+            }
+        ],
+        "recommendation": [
+            {
+                "Name": "Kulkas",
+                "Message": [
+                    "Rekomendasi untuk Kulkas:",
+                    "PRIORITAS RENDAH: Perangkat ini tidak mendesak. Pertimbangkan untuk membatasi penggunaannya.",
+                    "Kurangi penggunaannya agar tidak melebihi target harian 36.00 jam.",
+                    "Potensi penghematan jika perangkat ini tidak digunakan lagi hari ini: IDR 145.91"
+                ]
+            },
+            {
+                "Name": "Komputer",
+                "Message": [
+                    "Rekomendasi untuk Komputer:",
+                    "PRIORITAS RENDAH: Perangkat ini tidak mendesak. Pertimbangkan untuk membatasi penggunaannya.",
+                    "Kurangi penggunaannya agar tidak melebihi target harian 36.00 jam.",
+                    "Potensi penghematan jika perangkat ini tidak digunakan lagi hari ini: IDR 517.20"
+                ]
+            },
+            {
+                "Name": "Lampu Dapur",
+                "Message": [
+                    "Rekomendasi untuk Lampu Dapur:",
+                    "PRIORITAS RENDAH: Perangkat ini tidak mendesak. Pertimbangkan untuk membatasi penggunaannya.",
+                    "Kurangi penggunaannya agar tidak melebihi target harian 36.00 jam.",
+                    "Potensi penghematan jika perangkat ini tidak digunakan lagi hari ini: IDR 105.97"
+                ]
+            },
+            {
+                "Name": "Mesin Cuci",
+                "Message": [
+                    "Rekomendasi untuk Mesin Cuci:",
+                    "PRIORITAS RENDAH: Perangkat ini tidak mendesak. Pertimbangkan untuk membatasi penggunaannya.",
+                    "Kurangi penggunaannya agar tidak melebihi target harian 36.00 jam.",
+                    "Potensi penghematan jika perangkat ini tidak digunakan lagi hari ini: IDR 3380.60"
+                ]
+            }
+        ]
+    },
+    "message": "Recommendations generated",
+    "status": true,
+    "statusCode": 200
+}

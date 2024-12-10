@@ -215,13 +215,11 @@ func JumlahHariDalamBulan(tanggal string) (int, error) {
 func PrintRecommendationsMonthlyUsage(appliances []entity.ApplianceResponse, tarif float64, daysInMonth int, maxEnergy float64) []string {
 	timeSlots := []string{"00:00–06:00", "06:00–12:00", "12:00–18:00", "18:00–24:00"}
 
-	// Hitung total energi bulanan dan biaya untuk setiap appliance
 	for i := range appliances {
-		appliances[i].MonthlyUse = appliances[i].Energy * appliances[i].AverageUsage * float64(daysInMonth)
+		appliances[i].MonthlyUse = appliances[i].AverageUsage * float64(daysInMonth)
 		appliances[i].Cost = appliances[i].MonthlyUse * tarif
 	}
 
-	// Urutkan appliances berdasarkan Priority (true dulu), lalu energi rendah
 	sort.Slice(appliances, func(i, j int) bool {
 		if appliances[i].Priority == appliances[j].Priority {
 			return appliances[i].MonthlyUse < appliances[j].MonthlyUse
@@ -229,19 +227,17 @@ func PrintRecommendationsMonthlyUsage(appliances []entity.ApplianceResponse, tar
 		return appliances[i].Priority
 	})
 
-	// Penjadwalan appliances dengan batas energi
 	allocatedEnergy := 0.0
 	selectedAppliances := []entity.ApplianceResponse{}
 
 	for _, appliance := range appliances {
 		if allocatedEnergy+appliance.MonthlyUse <= maxEnergy {
 			allocatedEnergy += appliance.MonthlyUse
-			appliance.RecommendedSchedule = RecommendationsMonthlyUsage(appliance.AverageUsage, timeSlots)
+			appliance.RecommendedSchedule = RecommendationsMonthlyUsage(appliance, timeSlots)
 			selectedAppliances = append(selectedAppliances, appliance)
 		}
 	}
 
-	// Cetak jadwal appliances
 	result := []string{}
 	result = append(result, fmt.Sprintf("Jadwal Penggunaan Appliances (Total Energi = %.2f kWh, Biaya = Rp%.2f):", allocatedEnergy, allocatedEnergy*tarif))
 	for _, appliance := range selectedAppliances {
@@ -252,12 +248,34 @@ func PrintRecommendationsMonthlyUsage(appliances []entity.ApplianceResponse, tar
 	return result
 }
 
-func RecommendationsMonthlyUsage(dailyUse float64, timeSlots []string) []string {
+func RecommendationsMonthlyUsage(appliance entity.ApplianceResponse, timeSlots []string) []string {
 	recommended := []string{}
-	slotCount := int(dailyUse / 2.0) // Setiap slot = 2 jam
-	for i := 0; i < slotCount && i < len(timeSlots); i++ {
-		recommended = append(recommended, timeSlots[i])
+	remainingUsage := appliance.DailyUseTarget
+	distribution := map[string]float64{
+		"00:00–06:00": 1.0,
+		"06:00–12:00": 1.0,
+		"12:00–18:00": 1.0,
+		"18:00–24:00": 1.0,
 	}
+
+	// Atur distribusi berdasarkan jenis dan lokasi appliance
+	if appliance.Type == "Lampu" {
+		distribution["18:00–24:00"] += 0.5
+	} else if appliance.Type == "AC" {
+		distribution["00:00–06:00"] += 0.7
+		distribution["18:00–24:00"] += 0.3
+	} else if appliance.Type == "Mesin Cuci" {
+		distribution["06:00–12:00"] += 0.5
+	}
+
+	// Alokasi slot waktu berdasarkan distribusi
+	for _, slot := range timeSlots {
+		if remainingUsage > 0 && distribution[slot] > 0 {
+			recommended = append(recommended, slot)
+			remainingUsage -= 2.0 * distribution[slot]
+		}
+	}
+
 	return recommended
 }
 

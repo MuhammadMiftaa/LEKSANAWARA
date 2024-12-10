@@ -316,7 +316,7 @@ func (h *fileHandler) GenerateMonthlyRecommendations(c *gin.Context) {
 		})
 		return
 	}
-
+	
 	userInputs.Tarif = helper.GetTarif(userInputs.Golongan)
 	userInputs.MaksEnergi = userInputs.MaksBiaya / userInputs.Tarif
 	userInputs.Hari, _ = helper.JumlahHariDalamBulan(userInputs.Tanggal)
@@ -396,7 +396,7 @@ func (h *fileHandler) GenerateDailyRecommendations(c *gin.Context) {
 		"statusCode": 200,
 		"message":    "Recommendations generated",
 		"data": struct {
-			AnalysisResult []helper.DailySummary `json:"analysis-result"`
+			AnalysisResult []helper.DailySummary    `json:"analysis-result"`
 			Recommendation []helper.Recommendations `json:"recommendation"`
 		}{
 			AnalysisResult: analysisResult,

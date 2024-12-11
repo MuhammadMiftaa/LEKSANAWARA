@@ -1,9 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 import tailwindcssAnimate from "tailwindcss-animate";
+import flowbite from "flowbite-react/tailwind";
 
 export default {
   darkMode: ["class"],
-  content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
+  content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}", flowbite.content()],
   theme: {
     extend: {
       borderRadius: {
@@ -28,7 +29,8 @@ export default {
         third: "moveInCircle 40s linear infinite",
         fourth: "moveHorizontal 40s ease infinite",
         fifth: "moveInCircle 20s ease infinite",
-        shimmer: "shimmer 2s linear infinite",      },
+        shimmer: "shimmer 2s linear infinite",
+      },
       keyframes: {
         moveHorizontal: {
           "0%": {
@@ -74,5 +76,5 @@ export default {
       },
     },
   },
-  plugins: [tailwindcssAnimate],
+  plugins: [tailwindcssAnimate, flowbite.plugin()],
 };

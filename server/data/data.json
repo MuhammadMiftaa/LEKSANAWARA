@@ -1,17 +1,27 @@
 {
-  "data": [
-    "Jadwal Penggunaan Appliances (Total Energi = 896.55 kWh, Biaya = Rp1295247.64):",
-    "Name: AC Kamar, Priority: true, Monthly Use: 100.54 kWh, Cost: Rp145243.47, Schedule: [00:00–06:00 06:00–12:00 12:00–18:00 18:00–24:00]",
-    "Name: Microwave, Priority: true, Monthly Use: 102.89 kWh, Cost: Rp148638.76, Schedule: [00:00–06:00 06:00–12:00 12:00–18:00 18:00–24:00]",
-    "Name: Kulkas, Priority: false, Monthly Use: 90.39 kWh, Cost: Rp130587.64, Schedule: [00:00–06:00 06:00–12:00 12:00–18:00 18:00–24:00]",
-    "Name: TV, Priority: false, Monthly Use: 92.25 kWh, Cost: Rp133269.45, Schedule: [00:00–06:00 06:00–12:00 12:00–18:00 18:00–24:00]",
-    "Name: Komputer, Priority: false, Monthly Use: 96.41 kWh, Cost: Rp139283.53, Schedule: [00:00–06:00 06:00–12:00 12:00–18:00 18:00–24:00]",
-    "Name: Lampu Dapur, Priority: false, Monthly Use: 96.44 kWh, Cost: Rp139328.31, Schedule: [00:00–06:00 06:00–12:00 12:00–18:00 18:00–24:00]",
-    "Name: Lampu Ruang Tamu, Priority: false, Monthly Use: 104.02 kWh, Cost: Rp150273.25, Schedule: [00:00–06:00 06:00–12:00 12:00–18:00 18:00–24:00]",
-    "Name: Setrika, Priority: false, Monthly Use: 105.74 kWh, Cost: Rp152769.00, Schedule: [00:00–06:00 06:00–12:00 12:00–18:00 18:00–24:00]",
-    "Name: Mesin Cuci, Priority: false, Monthly Use: 107.88 kWh, Cost: Rp155854.24, Schedule: [00:00–06:00 06:00–12:00 12:00–18:00 18:00–24:00]"
-  ],
-  "message": "Recommendations generated",
+  "data": {
+    "candidates": [
+      {
+        "avgLogprobs": -0.3742780169925174,
+        "content": {
+          "parts": [
+            {
+              "text": "Shani Indira Natio adalah seorang aktris dan model berkebangsaan Indonesia.  Ia dikenal melalui perannya di beberapa film dan sinetron, meskipun belum mencapai tingkat ketenaran selebriti papan atas.  Informasi detail tentang karir dan kehidupan pribadinya terbatas di internet.  Ia lebih dikenal di kalangan penggemar perfilman dan sinetron Indonesia daripada publik luas.\n"
+            }
+          ],
+          "role": "model"
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "modelVersion": "gemini-1.5-flash-latest",
+    "usageMetadata": {
+      "candidatesTokenCount": 74,
+      "promptTokenCount": 6,
+      "totalTokenCount": 80
+    }
+  },
+  "message": "Request to Gemini API successful",
   "status": true,
   "statusCode": 200
 }

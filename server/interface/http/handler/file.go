@@ -6,8 +6,10 @@ import (
 	"errors"
 	"math"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"smart-home-energy-management-server/internal/entity"
@@ -174,6 +176,99 @@ func (h *fileHandler) GetTable(c *gin.Context) {
 }
 
 func (h *fileHandler) Chat(c *gin.Context) {
+	// Mendapatkan URL dan Token dari environment variable
+	baseUrl := os.Getenv("GEMINI_API_URL")
+	token := os.Getenv("GEMINI_API_KEY")
+
+	var inputs struct {
+		Question string `json:"question"`
+	}
+
+	// Bind request body ke struct inputs
+	err := c.ShouldBindJSON(&inputs)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":     false,
+			"statusCode": 400,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	// Membuat request ke Gemini API
+	geminiReq, err := json.Marshal(map[string][]map[string]map[string]string{"contents": {{"parts": {"text": inputs.Question}}}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	// Membuat URL dengan query params
+	u, _ := url.Parse(baseUrl)
+	queryParams := u.Query()
+	queryParams.Set("key", token)
+	u.RawQuery = queryParams.Encode()
+
+	// Membuat request ke Gemini API
+	req, err := http.NewRequest("POST", u.String(), bytes.NewBuffer(geminiReq))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	// Mengirim request ke Gemini API
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		c.JSON(resp.StatusCode, gin.H{
+			"status":     false,
+			"statusCode": resp.StatusCode,
+			"message":    "Request to Gemini API failed",
+		})
+		return
+	}
+
+	// Decode response dari Gemini
+	var result helper.GeminiResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	// Return hasil dari Gemini API
+	c.JSON(http.StatusOK, gin.H{
+		"status":     true,
+		"statusCode": 200,
+		"message":    "Request to Gemini API successful",
+		"data":       strings.Split(result.Candidates[0].Content.Parts[0].Text, "\n")[0],
+	})
+}
+
+func (h *fileHandler) TapasChat(c *gin.Context) {
 	// Mendapatkan URL dan Token dari environment variable
 	tapasURL := os.Getenv("HUGGINGFACE_API_TAPAS_URL")
 	marianmtURL := os.Getenv("HUGGINGFACE_API_MARIANMT_URL")

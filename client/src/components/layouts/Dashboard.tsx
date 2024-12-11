@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { Link } from "react-router-dom";
 import useSWR from "swr";
+import { Tabs } from "../ui/tabs";
+import RoomsTabs from "../templates/Rooms";
 
 export default function Dashboard() {
   // GET request to fetch table data🐳
@@ -25,8 +27,36 @@ export default function Dashboard() {
 
   const [openHeader, setOpenHeader] = useState<boolean>(true);
 
+  const tabs = [
+    {
+      title: "Rooms",
+      value: "Rooms",
+      content: <RoomsTabs />,
+    },
+    {
+      title: "Analytics",
+      value: "Analytics",
+      content: (
+        <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-white bg-transparent">
+          <p>Analytics tab</p>
+          <DummyContent />
+        </div>
+      ),
+    },
+    {
+      title: "Recommendations",
+      value: "Recommendations",
+      content: (
+        <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-white bg-transparent">
+          <p>Recommendations tab</p>
+          <DummyContent />
+        </div>
+      ),
+    },
+  ];
+
   return (
-    <div className="bg-lightGray min-h-screen w-full relative left-0 right-0 p-4 font-poppins flex flex-col gap-4">
+    <div className="bg-lightGray absolute inset-0 p-4 font-poppins flex flex-col gap-4">
       <div
         className={`inset-x-4 bg-lightGray absolute z-10 duration-1000 ${
           openHeader ? "w-[97.5%]" : "h-24 w-24 rounded-bottom-right-2xl"
@@ -37,7 +67,7 @@ export default function Dashboard() {
             openHeader ? "w-full" : "w-20"
           }`}
         >
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-5 w-fit">
             <img
               onClick={() => setOpenHeader(!openHeader)}
               src="/logo.webp"
@@ -85,11 +115,21 @@ export default function Dashboard() {
         </div>
       </div>
       <div
-        className={`rounded-xl bg-gradient-to-t from-tealBright to-teal-300 h-[120vh] left-4 right-4 flex flex-col justify-center items-center duration-700 absolute ${
+        className={`rounded-xl bg-gradient-to-t from-tealBright to-teal-300 bottom-4 left-4 right-4 flex flex-col justify-center items-center duration-700 absolute overflow-hidden ${
           openHeader ? "top-28" : "top-4 delay-700"
         }`}
       >
-        {table ? <h1>Dashboard</h1> : <GoToUpload />}
+        {table ? (
+          <div className="h-full w-full relative b flex flex-col items-start justify-start">
+            <Tabs
+              tabs={tabs}
+              containerClassName={`${!openHeader ? "h-28" : "h-16"}`}
+              openHeader={openHeader}
+            />
+          </div>
+        ) : (
+          <GoToUpload />
+        )}
       </div>
     </div>
   );
@@ -112,3 +152,15 @@ function GoToUpload() {
     </>
   );
 }
+
+const DummyContent = () => {
+  return (
+    <img
+      src="/linear.webp"
+      alt="dummy image"
+      width="1000"
+      height="1000"
+      className="object-cover object-left-top h-[60%]  md:h-[90%] absolute -bottom-10 inset-x-0 w-[90%] rounded-xl mx-auto"
+    />
+  );
+};

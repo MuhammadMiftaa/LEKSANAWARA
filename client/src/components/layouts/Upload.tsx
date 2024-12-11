@@ -31,7 +31,7 @@ export default function Upload() {
       }
 
       const data = await response.json();
-      console.log("Upload successful:", data);
+      console.log("Upload successful:", {files, data});
     } catch (error) {
       console.error("Error uploading file:", error);
     }

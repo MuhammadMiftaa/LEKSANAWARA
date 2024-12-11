@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .rounded-bottom-right-2xl {
+    border-radius: 0 0rem 1rem 0rem;
+  }
+}
+
 @font-face {
   font-family: "Inter";
   src: url("./fonts/Inter.ttf") format("truetype");

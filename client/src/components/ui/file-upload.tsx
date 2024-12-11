@@ -45,7 +45,9 @@ export const FileUpload = ({
     }
 
     setFiles((prevFiles) => [...prevFiles, ...csvFiles]);
-    onChange && onChange(csvFiles);
+    if (onChange) {
+      onChange(csvFiles);
+    }
   };
 
   const handleClick = () => {

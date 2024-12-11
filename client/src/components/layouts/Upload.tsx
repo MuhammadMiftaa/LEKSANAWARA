@@ -1,7 +1,13 @@
+"use client"
 import { BackgroundGradientAnimation } from "../ui/background-gradient-animation";
-("use client");
 import { useState } from "react";
 import { FileUpload } from "@/components/ui/file-upload";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function Upload() {
   const [files, setFiles] = useState<File[]>([]);
@@ -35,7 +41,7 @@ export default function Upload() {
       gradientBackgroundStart="rgb(30, 60, 90)"
       gradientBackgroundEnd="rgb(10, 20, 50)"
       firstColor="50, 130, 160"
-      secondColor="20, 40, 70" 
+      secondColor="20, 40, 70"
       thirdColor="40, 100, 140"
       fourthColor="80, 150, 200"
       fifthColor="100, 200, 240"
@@ -56,6 +62,14 @@ export default function Upload() {
             PowerSync
           </h1>
         </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger className="z-50 font-light uppercase absolute bottom-2 right-4 text-base text-zinc-200 hover:underline">Logout</TooltipTrigger>
+            <TooltipContent>
+              <p>Log out of your account securely</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </BackgroundGradientAnimation>
   );

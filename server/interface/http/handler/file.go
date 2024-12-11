@@ -41,7 +41,7 @@ func (h *fileHandler) UploadFileCSV(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":     false,
-			"DANCOK":	 "DANCOK",
+			"DANCOK":     "DANCOK",
 			"statusCode": 400,
 			"message":    err.Error(),
 		})
@@ -81,6 +81,7 @@ func (h *fileHandler) UploadFileCSV(c *gin.Context) {
 		return
 	}
 
+	// Parsing CSV ke struct
 	appliances, err := helper.ParseCSVtoSliceOfStruct(filepath.Join(absolutePath, "INPUT-TABLE.csv"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -91,12 +92,15 @@ func (h *fileHandler) UploadFileCSV(c *gin.Context) {
 		return
 	}
 
+	// Simpan data ke database
 	var wg sync.WaitGroup
 	var errors []string
 	var mu sync.Mutex
 
+	// Truncate table appliances
 	h.applianceService.TruncateAppliances()
 	for i := 0; i < len(appliances); i++ {
+		// Goroutine untuk insert data ke database
 		wg.Add(1)
 		go func(appliance entity.ApplianceRequest) {
 			defer wg.Done()
@@ -120,7 +124,7 @@ func (h *fileHandler) UploadFileCSV(c *gin.Context) {
 		return
 	}
 
-	// Simpan table ke redis
+	// Marshal result ke JSON
 	jsonResult, err := json.Marshal(result)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -131,6 +135,7 @@ func (h *fileHandler) UploadFileCSV(c *gin.Context) {
 		return
 	}
 
+	// Simpan table ke redis
 	if err = h.fileService.SaveTable(string(jsonResult)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":     false,
@@ -145,6 +150,26 @@ func (h *fileHandler) UploadFileCSV(c *gin.Context) {
 		"statusCode": 200,
 		"message":    "Upload table success",
 		"data":       fileName,
+	})
+}
+
+func (h *fileHandler) GetTable(c *gin.Context) {
+	// Mendapatkan table dari redis cache
+	table, err := h.fileService.GetTable()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":     true,
+		"statusCode": 200,
+		"message":    "Get table success",
+		"data":       table,
 	})
 }
 
@@ -317,7 +342,7 @@ func (h *fileHandler) GenerateMonthlyRecommendations(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	userInputs.Tarif = helper.GetTarif(userInputs.Golongan)
 	userInputs.MaksEnergi = userInputs.MaksBiaya / userInputs.Tarif
 	userInputs.Hari, _ = helper.JumlahHariDalamBulan(userInputs.Tanggal)

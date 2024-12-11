@@ -22,6 +22,7 @@ func FileRoutes(version *gin.RouterGroup, psql *gorm.DB, redis *redis.Client) {
 	fileHandler := handler.NewFileHandler(applianceService, fileService, recommendationService)
 
 	version.POST("/upload", fileHandler.UploadFileCSV)
+	version.GET("/table", fileHandler.GetTable)
 	version.POST("/chat", fileHandler.Chat)
 	version.POST("/generate-daily-recommendations", fileHandler.GenerateDailyRecommendations)
 	version.POST("/generate-monthly-recommendations", fileHandler.GenerateMonthlyRecommendations)

@@ -41,6 +41,7 @@ func (h *fileHandler) UploadFileCSV(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":     false,
+			"DANCOK":	 "DANCOK",
 			"statusCode": 400,
 			"message":    err.Error(),
 		})

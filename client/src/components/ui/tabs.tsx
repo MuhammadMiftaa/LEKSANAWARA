@@ -46,12 +46,46 @@ export const Tabs = ({
   const [hovering, setHovering] = useState(false);
 
   const [dialog, setDialog] = useState<string[]>([
-    "Hi, I'm Gemini AI! how can I help you today?",
+    "Hi, I'm Gemini AI! How can I help you today?",
   ]);
 
-  function addChat(e: React.FormEvent<HTMLFormElement>) {
+  async function addChat(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setDialog([...dialog, e.currentTarget["chat"].value]);
+
+    // Ambil input dari form
+    const userMessage = e.currentTarget["chat"].value;
+    e.currentTarget["chat"].value = "";
+
+    // Tambahkan userMessage ke dialog sementara
+    setDialog((prev) => [...prev, userMessage]);
+
+    try {
+      // Lakukan fetch ke API
+      const response = await fetch("http://localhost:8080/v1/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question: userMessage }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status) {
+        // Tambahkan response dari API ke dialog
+        setDialog((prev) => [...prev, data.data]);
+      } else {
+        // Tambahkan fallback message jika API gagal
+        setDialog((prev) => [
+          ...prev,
+          "Sorry, I can't understand your question",
+        ]);
+      }
+    } catch (error) {
+      // Tangani error jika fetch gagal
+      console.error("Error fetching chat response:", error);
+      setDialog((prev) => [...prev, "Something went wrong. Please try again."]);
+    }
   }
 
   return (

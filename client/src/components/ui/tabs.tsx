@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { BiSolidBot } from "react-icons/bi";
 import { Drawer } from "flowbite-react";
+import ChatComponent from "./chat-form";
 
 type Tab = {
   title: string;
@@ -31,7 +32,7 @@ export const Tabs = ({
   const [active, setActive] = useState<Tab>(propTabs[0]);
   const [tabs, setTabs] = useState<Tab[]>(propTabs);
 
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const handleClose = () => setIsOpen(false);
 
   const moveSelectedTabToTop = (idx: number) => {
@@ -43,6 +44,15 @@ export const Tabs = ({
   };
 
   const [hovering, setHovering] = useState(false);
+
+  const [dialog, setDialog] = useState<string[]>([
+    "Hi, I'm Gemini AI! how can I help you today?",
+  ]);
+
+  function addChat(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setDialog([...dialog, e.currentTarget["chat"].value]);
+  }
 
   return (
     <>
@@ -82,11 +92,11 @@ export const Tabs = ({
           </button>
         ))}
         <div
-          className={`absolute right-20 duration-300 ${
+          className={`absolute right-8 duration-300 ${
             !openHeader ? "top-7" : "top-2"
           }`}
         >
-          <button className="inline-flex h-10 ml-16 mr-4 animate-shimmer items-center justify-center rounded-xl border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
+          <button className="inline-flex h-10 mr-4 animate-shimmer items-center justify-center rounded-xl border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
             Unlock Premium
           </button>
           <Button
@@ -101,49 +111,35 @@ export const Tabs = ({
           </Button>
         </div>
       </div>
-      <Drawer open={isOpen} onClose={handleClose} position="right">
-        <Drawer.Header title="Drawer" />
-        <Drawer.Items>
-          <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
-            Supercharge your hiring by taking advantage of our&nbsp;
-            <a
-              href="#"
-              className="text-cyan-600 underline hover:no-underline dark:text-cyan-500"
-            >
-              limited-time sale
-            </a>
-            &nbsp;for Flowbite Docs + Job Board. Unlimited access to over 190K
-            top-ranked candidates and the #1 design job board.
-          </p>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <a
-              href="#"
-              className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-center text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-cyan-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
-            >
-              Learn more
-            </a>
-            <a
-              href="#"
-              className="inline-flex items-center rounded-lg bg-cyan-700 px-4 py-2 text-center text-sm font-medium text-white hover:bg-cyan-800 focus:outline-none focus:ring-4 focus:ring-cyan-300 dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-cyan-800"
-            >
-              Get access&nbsp;
-              <svg
-                className="ms-2 h-3.5 w-3.5 rtl:rotate-180"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 14 10"
+      <Drawer
+        className="bg-black w-96 overflow-hidden"
+        open={isOpen}
+        onClose={handleClose}
+        position="right"
+      >
+        <Drawer.Header
+          titleIcon={() => (
+            <div className="text-2xl mr-2 flex items-center -mt-1">
+              <BiSolidBot />
+            </div>
+          )}
+          title={" " + "Chat with Gemini AI"}
+        />
+        <Drawer.Items className="h-[95%] relative">
+          <div className="flex flex-col relative h-[88%] overflow-auto">
+            {dialog.map((chat, idx) => (
+              <div
+                className={`p-1 rounded-md my-1 w-[90%] ${
+                  idx % 2 === 0
+                    ? "bg-gradientStart self-start text-black"
+                    : "bg-tealBright self-end"
+                }`}
               >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M1 5h12m0 0L9 1m4 4L9 9"
-                />
-              </svg>
-            </a>
+                <h1>{chat}</h1>
+              </div>
+            ))}
           </div>
+          <ChatComponent handleChat={addChat} />
         </Drawer.Items>
       </Drawer>
       <FadeInDiv

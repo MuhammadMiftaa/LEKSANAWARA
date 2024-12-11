@@ -47,6 +47,7 @@ export const Tabs = ({
 
   const [dialog, setDialog] = useState<string[]>([
     "Hi, I'm Gemini AI! How can I help you today?",
+    "Hi, I'm Gemini AI! How can I help you today?",
   ]);
 
   async function addChat(e: React.FormEvent<HTMLFormElement>) {
@@ -146,7 +147,7 @@ export const Tabs = ({
         </div>
       </div>
       <Drawer
-        className="bg-black w-96 overflow-hidden"
+        className="bg-black w-96 overflow-hidden duration-1000 ease-ease-in-out-back"
         open={isOpen}
         onClose={handleClose}
         position="right"
@@ -163,10 +164,10 @@ export const Tabs = ({
           <div className="flex flex-col relative h-[88%] overflow-auto">
             {dialog.map((chat, idx) => (
               <div
-                className={`p-1 rounded-md my-1 w-[90%] ${
+                className={`py-1 px-2 rounded-md my-2 w-[90%] ${
                   idx % 2 === 0
-                    ? "bg-gradientStart self-start text-black"
-                    : "bg-tealBright self-end"
+                    ? "bg-tealBright self-start text-black"
+                    : "bg-gradientStart self-end"
                 }`}
               >
                 <h1>{chat}</h1>

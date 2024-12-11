@@ -7,12 +7,12 @@ type Props = {
 const ChatComponent: React.FC<Props> = ({ handleChat }) => {
   return (
     <form onSubmit={handleChat} className="absolute bottom-0 w-full">
-      <div className="flex items-center pe-2 py-2 rounded-lg bg-gray-700">
+      <div className="flex items-center">
         <textarea
           name="chat"
           id="chat"
           rows={1}
-          className="block mx-4 p-2.5 w-full text-sm rounded-lg border bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+          className="block p-2.5 w-full text-sm rounded-lg border bg-gray-800 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
           placeholder="Your message..."
         ></textarea>
         <button

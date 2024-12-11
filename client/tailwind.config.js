@@ -74,6 +74,11 @@ export default {
           },
         },
       },
+      transitionTimingFunction: {
+        'smooth': 'cubic-bezier(0.25, 1, 0.5, 1)', // Smooth & responsive
+        'ease-in-out-back': 'cubic-bezier(0.68, -0.55, 0.27, 1.55)', // Bounce-like effect
+        'ease-in-out-smooth': 'cubic-bezier(0.4, 0.0, 0.2, 1)', // Default ease-in-out, but smooth
+      },
     },
   },
   plugins: [tailwindcssAnimate, flowbite.plugin()],

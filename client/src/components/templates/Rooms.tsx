@@ -14,6 +14,7 @@ import {
   processAppliances,
 } from "@/helper/function";
 import { ChartComponent } from "./Chart";
+import { OverusedDeviceComponent } from "./OverusedDevice";
 // import * as moment from "moment-duration-format";
 
 export default function RoomsTabs() {
@@ -195,9 +196,10 @@ export default function RoomsTabs() {
                   overusedDevices.percentage > 50
                     ? "text-red-600"
                     : "text-green-600"
-                } font-bold text-3xl`}
+                } font-bold text-3xl relative`}
               >
                 {overusedDevices.percentage}%
+                <span className="text-xl absolute -bottom-5 left-1/2 -translate-x-1/2 cursor-pointer"><OverusedDeviceComponent data={overusedDevices.devices} appliancesLength={allAppliances["Device ID"].length} /></span>
               </h1>
             </div>
           </div>

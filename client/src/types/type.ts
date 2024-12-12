@@ -35,4 +35,6 @@ export type OverusedDevices = {
   name: string;
   duration: number;
   averageUsage: number;
+  usageStartTime: string;
+  usageEndTime: string;
 };

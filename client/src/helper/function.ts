@@ -145,7 +145,7 @@ export function generateColors(length: number): string[] {
 export function findOverusedDevices(
   allAppliances: AllAppliances,
   appliances: Appliance[]
-) {
+): OverusedDevices[] {
   // Hasil perangkat yang melebihi average_usage
   const overusedDevices: OverusedDevices[] = [];
 
@@ -160,6 +160,8 @@ export function findOverusedDevices(
         name: deviceName,
         duration: deviceDuration,
         averageUsage: matchedAppliance.average_usage,
+        usageStartTime: allAppliances["Usage Start Time"][index],
+        usageEndTime: allAppliances["Usage End Time"][index],
       });
     }
   });

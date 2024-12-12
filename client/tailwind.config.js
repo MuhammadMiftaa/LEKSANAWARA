@@ -8,8 +8,10 @@ export default {
   theme: {
     extend: {
       boxShadow: {
+        "medium": "0 0 10px 0 rgba(0, 0, 0, 0.1)",
         "strong": "0 0 30px 0 rgba(0, 0, 0, 0.3)",
-        'inner-strong': 'inset 0 0 30px 0 rgba(0, 0, 0, 0.5)', // Bayangan kuat
+        'inner-medium': 'inset 0 0 10px 0 rgba(0, 0, 0, 0.3)',
+        'inner-strong': 'inset 0 0 30px 0 rgba(0, 0, 0, 0.5)',
       },
       borderRadius: {
         lg: "var(--radius)",

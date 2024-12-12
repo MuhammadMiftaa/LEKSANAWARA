@@ -418,6 +418,25 @@ func (h *fileHandler) TapasChat(c *gin.Context) {
 	})
 }
 
+func (h *fileHandler) GetAppliance(c *gin.Context) {
+	appliances, err := h.applianceService.GetAllAppliances()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":     true,
+		"statusCode": 200,
+		"message":    "Get appliances success",
+		"data":       appliances,
+	})
+}
+
 func (h *fileHandler) GenerateMonthlyRecommendations(c *gin.Context) {
 	var userInputs struct {
 		Golongan   string  `json:"golongan"` // INPUT

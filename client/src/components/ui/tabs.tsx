@@ -47,7 +47,6 @@ export const Tabs = ({
 
   const [dialog, setDialog] = useState<string[]>([
     "Hi, I'm Gemini AI! How can I help you today?",
-    "Hi, I'm Gemini AI! How can I help you today?",
   ]);
 
   async function addChat(e: React.FormEvent<HTMLFormElement>) {
@@ -127,7 +126,7 @@ export const Tabs = ({
           </button>
         ))}
         <div
-          className={`absolute right-8 duration-300 ${
+          className={`absolute right-8 duration-300 flex items-center ${
             !openHeader ? "top-7" : "top-2"
           }`}
         >
@@ -164,6 +163,7 @@ export const Tabs = ({
           <div className="flex flex-col relative h-[88%] overflow-auto">
             {dialog.map((chat, idx) => (
               <div
+                key={idx}
                 className={`py-1 px-2 rounded-md my-2 w-[90%] ${
                   idx % 2 === 0
                     ? "bg-tealBright self-start text-black"

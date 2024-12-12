@@ -32,7 +32,7 @@ export function ChartComponent({
   const { chartData, chartConfig } = transformDataToChartProps(appliance);
 
   return (
-    <Card className="flex flex-col bg-transparent border-none">
+    <Card className="flex flex-col bg-transparent justify-evenly h-full border-none">
       <CardHeader className="items-center pb-0">
         <CardTitle className="text-white text-xl font-light -mb-2 tracking-wide">
           Daily Energy Consumption Overview
@@ -110,7 +110,7 @@ export function ChartComponent({
           effortlessly.
         </div>
         <div className="leading-none text-muted-foreground text-tealBright">
-          Last Synced: {date.split(" ")[0]}
+          Last Synced: {date && date.split(" ")[0]}
         </div>
       </CardFooter>
     </Card>

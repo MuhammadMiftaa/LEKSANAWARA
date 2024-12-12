@@ -30,3 +30,9 @@ export type AllAppliances = {
   "Usage End Time": string[];
   "Usage Start Time": string[];
 };
+
+export type OverusedDevices = {
+  name: string;
+  duration: number;
+  averageUsage: number;
+};

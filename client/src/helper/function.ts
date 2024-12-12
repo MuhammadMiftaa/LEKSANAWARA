@@ -1,4 +1,4 @@
-import { AllAppliances, Appliance } from "@/types/type";
+import { AllAppliances, Appliance, OverusedDevices } from "@/types/type";
 
 export function convertToHoursMinutes(decimalHours: number): string {
   const hours = Math.floor(decimalHours);
@@ -140,4 +140,29 @@ export function generateColors(length: number): string[] {
   }
 
   return colors;
+}
+
+export function findOverusedDevices(
+  allAppliances: AllAppliances,
+  appliances: Appliance[]
+) {
+  // Hasil perangkat yang melebihi average_usage
+  const overusedDevices: OverusedDevices[] = [];
+
+  // Loop melalui semua perangkat di AllAppliances
+  allAppliances["Device Name"].forEach((deviceName, index) => {
+    const deviceDurationStr = allAppliances["Duration (Hours)"][index];
+    const deviceDuration = parseFloat(deviceDurationStr) || 0; // Konversi ke angka
+    const matchedAppliance = appliances.find((a) => a.name === deviceName); // Cocokkan dengan Appliance
+
+    if (matchedAppliance && deviceDuration > matchedAppliance.average_usage) {
+      overusedDevices.push({
+        name: deviceName,
+        duration: deviceDuration,
+        averageUsage: matchedAppliance.average_usage,
+      });
+    }
+  });
+
+  return overusedDevices;
 }

@@ -7,6 +7,10 @@ export default {
   content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}", flowbite.content()],
   theme: {
     extend: {
+      boxShadow: {
+        "strong": "0 0 30px 0 rgba(0, 0, 0, 0.3)",
+        'inner-strong': 'inset 0 0 30px 0 rgba(0, 0, 0, 0.5)', // Bayangan kuat
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

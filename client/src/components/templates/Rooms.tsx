@@ -1,4 +1,4 @@
-import { AllAppliances, Appliance } from "@/types/type";
+import { AllAppliances, Appliance, OverusedDevices } from "@/types/type";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import {
@@ -8,7 +8,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { convertToHoursMinutes, processAppliances } from "@/helper/function";
+import {
+  convertToHoursMinutes,
+  findOverusedDevices,
+  processAppliances,
+} from "@/helper/function";
 import { ChartComponent } from "./Chart";
 // import * as moment from "moment-duration-format";
 
@@ -102,6 +106,19 @@ export default function RoomsTabs() {
   }, [alldata]);
   // GET request to fetch all appliances data🐳
 
+  const [overusedDevices, setOverusedDevices] = useState<{
+    devices: OverusedDevices[];
+    percentage: number;
+  }>({ devices: [], percentage: 0 });
+
+  useEffect(() => {
+    const result = findOverusedDevices(allAppliances, appliance);
+    const percentage = Math.round(
+      (result.length / allAppliances["Device ID"].length) * 100
+    );
+    setOverusedDevices({ devices: result, percentage });
+  }, [appliance, allAppliances]);
+
   return (
     <div className="w-full overflow-hidden relative h-full">
       <div className="h-full grid grid-cols-5 gap-4 p-4 grid-rows-2">
@@ -157,10 +174,51 @@ export default function RoomsTabs() {
           <CarouselPrevious />
           <CarouselNext />
         </Carousel>
-        <div className="bg-gradient-to-br from-gradientStart to-gradientEnd w-full h-full rounded-3xl"></div>
+        <div className="bg-gradient-to-br from-gradientStart to-gradientEnd w-full h-full rounded-3xl flex flex-col items-center justify-center py-1">
+          <h1 className="font-semibold text-white">Device Usage Insights</h1>
+          <div
+            className={`${
+              overusedDevices.percentage > 50
+                ? "bg-red-600 shadow-red-600"
+                : "bg-green-600 shadow-green-600"
+            } h-32 w-32 rounded-full flex items-center justify-center my-3 shadow-strong`}
+          >
+            <div
+              className={`${
+                overusedDevices.percentage > 50
+                  ? "shadow-red-600"
+                  : "shadow-green-600"
+              } h-28 w-28 bg-gradient-to-br from-gradientStart to-gradientEnd rounded-full flex justify-center items-center shadow-inner-strong`}
+            >
+              <h1
+                className={`${
+                  overusedDevices.percentage > 50
+                    ? "text-red-600"
+                    : "text-green-600"
+                } font-bold text-3xl`}
+              >
+                {overusedDevices.percentage}%
+              </h1>
+            </div>
+          </div>
+          <h2
+            className={`${
+              overusedDevices.percentage > 50
+                ? "text-red-600"
+                : "text-green-600"
+            } text-[0.6rem] w-3/4 font-semibold text-center`}
+          >
+            Warning: {overusedDevices.percentage}% of your devices are being
+            used more than usual.
+          </h2>
+        </div>
         <div className="col-span-2 row-span-2 w-full h-full rounded-3xl flex flex-col gap-4">
           <div className="rounded-3xl bg-gradient-to-br from-gradientStart to-gradientEnd w-full h-full overflow-hidden">
-            <ChartComponent appliance={appliance} totalEnergy={analysisResult.totalEnergyConsumption} date={allAppliances["Usage Start Time"][0]} />
+            <ChartComponent
+              appliance={appliance}
+              totalEnergy={analysisResult.totalEnergyConsumption}
+              date={allAppliances["Usage Start Time"][0]}
+            />
           </div>
           <div className="rounded-3xl bg-gradient-to-br from-gradientStart to-gradientEnd w-full h-20"></div>
         </div>

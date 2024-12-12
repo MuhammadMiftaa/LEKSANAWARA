@@ -54,8 +54,8 @@ export default function RoomsTabs() {
     totalEnergyConsumption: 0,
     averageEnergyConsumption: 0,
     connectedDevicesCount: 0,
-    maxEnergyDevice: { "Energy Consumption (kWh)": 0 },
-    maxDurationDevice: { "Duration (Hours)": 0 },
+    maxEnergyDevice: { "Device Name": "", "Device Type": "", "Energy Consumption (kWh)": 0 },
+    maxDurationDevice: { "Device Name": "", "Device Type": "", "Duration (Hours)": 0 },
   });
   const allAppliancesFetcher = (url: string, init: RequestInit | undefined) =>
     fetch(url, init).then((res) => res.json());
@@ -99,10 +99,10 @@ export default function RoomsTabs() {
 
   return (
     <div className="w-full overflow-hidden relative h-full">
-      <div className="flex gap-6">
+      <div className="h-full grid grid-cols-5 gap-4 p-4 grid-rows-2">
         <Carousel
           orientation="horizontal"
-          className="w-[30rem] h-56 m-4 rounded-3xl bg-gradient-to-br from-gradientStart to-gradientEnd py-2 px-4"
+          className="col-span-2 h-full rounded-3xl bg-gradient-to-br from-gradientStart to-gradientEnd py-2 px-4"
         >
           <CarouselContent className="rounded-3xl">
             {appliance.map((app, index) => (
@@ -152,6 +152,50 @@ export default function RoomsTabs() {
           <CarouselPrevious />
           <CarouselNext />
         </Carousel>
+        <div className="col-span-3 row-start-2 h-full w-full rounded-3xl bg-gradient-to-br from-gradientStart to-gradientEnd flex flex-col items-center py-3 px-6">
+          <div className="flex justify-between items-center gap-4 w-full h-full">
+            <div className="flex flex-col  w-full">
+              <h1 className="text-center font-light text-xl text-white mb-3">{analysisResult.maxEnergyDevice["Device Name"]}</h1>
+              <div className="flex justify-center items-center">
+                <img
+                  className="h-24 object-contain mb-4 bg-gradient-to-b from-teal-300 to-teal-100 aspect-square rounded-full -mr-2"
+                  src={`/appliance/${analysisResult.maxEnergyDevice["Device Type"]}.png`}
+                  alt=""
+                />
+                <h1 className="text-tealBright font-bold text-3xl p-5 border-4 border-tealBright rounded-full aspect-square bg-lightGray flex items-center justify-end flex-col">
+                  {analysisResult.maxEnergyDevice["Energy Consumption (kWh)"]}{" "}
+                  <span className="block font-light text-lg -mt-2.5">kWh</span>
+                </h1>
+              </div>
+              <h1 className="text-zinc-200 font-semibold text-center">
+                Highest Energy Consumption
+              </h1>
+              <h2 className="text-tealBright font-bold text-2xl text-center -mt-1">
+                in a Single Use
+              </h2>
+            </div>
+            <div className="flex flex-col  w-full">
+              <h1 className="text-center font-light text-xl text-white mb-3">{analysisResult.maxDurationDevice["Device Name"]}</h1>
+              <div className="flex justify-center items-center">
+                <img
+                  className="h-24 object-contain mb-4 bg-gradient-to-b from-teal-300 to-teal-100 aspect-square rounded-full -mr-2"
+                  src={`/appliance/${analysisResult.maxDurationDevice["Device Type"]}.png`}
+                  alt=""
+                />
+                <h1 className="text-tealBright font-bold text-3xl p-5 border-4 border-tealBright rounded-full aspect-square bg-lightGray flex items-center justify-end flex-col">
+                  {analysisResult.maxDurationDevice["Duration (Hours)"]}{" "}
+                  <span className="block font-light text-lg -mt-2.5">Hours</span>
+                </h1>
+              </div>
+              <h1 className="text-zinc-200 font-semibold text-center">
+                Longest Usage Duration
+              </h1>
+              <h2 className="text-tealBright font-bold text-2xl text-center -mt-1">
+                in a Single Session
+              </h2>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

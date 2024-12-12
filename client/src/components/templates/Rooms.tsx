@@ -199,20 +199,26 @@ export default function RoomsTabs() {
                 } font-bold text-3xl relative`}
               >
                 {overusedDevices.percentage}%
-                <span className="text-xl absolute -bottom-5 left-1/2 -translate-x-1/2 cursor-pointer"><OverusedDeviceComponent data={overusedDevices.devices} appliancesLength={allAppliances["Device ID"].length} /></span>
+                <span className="text-xl absolute -bottom-5 left-1/2 -translate-x-1/2 cursor-pointer">
+                  <OverusedDeviceComponent
+                    data={overusedDevices.devices}
+                    appliancesLength={allAppliances["Device ID"].length}
+                  />
+                </span>
               </h1>
             </div>
           </div>
-          <h2
-            className={`${
-              overusedDevices.percentage > 50
-                ? "text-red-600"
-                : "text-green-600"
-            } text-[0.6rem] w-3/4 font-semibold text-center`}
-          >
-            Warning: {overusedDevices.percentage}% of your devices are being
-            used more than usual.
-          </h2>
+          {overusedDevices.percentage > 50 ? (
+            <h2 className="text-red-600 text-[0.6rem] w-3/4 font-semibold text-center">
+              Warning: {overusedDevices.percentage}% of your devices are being
+              used more than usual.
+            </h2>
+          ) : (
+            <h2 className="text-green-600 text-[0.6rem] w-3/4 font-semibold text-center">
+              Awesome! Only 30% {overusedDevices.percentage}% of your devices
+              exceeded their average usage.
+            </h2>
+          )}
         </div>
         <div className="col-span-2 row-span-2 w-full h-full rounded-3xl flex flex-col gap-4">
           <div className="rounded-3xl bg-gradient-to-br from-gradientStart to-gradientEnd w-full h-full overflow-hidden">
@@ -222,7 +228,18 @@ export default function RoomsTabs() {
               date={allAppliances["Usage Start Time"][0]}
             />
           </div>
-          <div className="rounded-3xl bg-gradient-to-br from-gradientStart to-gradientEnd w-full h-20"></div>
+          <div className="rounded-3xl bg-gradient-to-br from-gradientStart to-gradientEnd w-full h-20 flex overflow-scroll items-center px-3 gap-3">
+            {allAppliances.Location.filter((item, index) => {
+              return allAppliances.Location.indexOf(item) === index;
+            }).map((location, index) => (
+              <h1
+                key={index}
+                className="font-semibold text-xl py-1 px-3 text-center text-nowrap rounded-2xl bg-gradient-to-b from-lightGray to-teal-300"
+              >
+                {location}
+              </h1>
+            ))}
+          </div>
         </div>
         <div className="col-span-3 row-start-2 h-full w-full rounded-3xl bg-gradient-to-br from-gradientStart to-gradientEnd flex flex-col items-center py-3 px-6">
           <div className="flex justify-between items-center gap-4 w-full h-full">

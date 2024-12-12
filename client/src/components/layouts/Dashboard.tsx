@@ -59,12 +59,12 @@ export default function Dashboard() {
     <div className="bg-lightGray absolute inset-0 p-4 font-poppins flex flex-col gap-4">
       <div
         className={`inset-x-4 bg-lightGray absolute z-10 ease-ease-in-out-smooth duration-1000 ${
-          openHeader ? "w-[97.5%]" : "h-24 w-24 rounded-bottom-right-2xl"
+          openHeader ? "w-[97.5%] h-24" : "h-24 w-24 rounded-bottom-right-2xl "
         }`}
       >
         <div
           className={`bg-gradient-to-b from-tealBright to-teal-300 text-black rounded-xl py-3 px-5 flex items-center justify-between ease-ease-in-out-smooth duration-1000 h-20  ${
-            openHeader ? "w-full" : "w-20"
+            openHeader ? "w-full delay-300" : "w-20"
           }`}
         >
           <div className="flex items-center gap-5 w-fit">
@@ -76,7 +76,7 @@ export default function Dashboard() {
             />
             <div
               className={`${
-                !openHeader ? "scale-0" : "delay-500"
+                !openHeader ? "opacity-0" : "delay-1000"
               } ease-ease-in-out-smooth duration-500 flex gap-4`}
             >
               <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2">
             <div
               className={`flex flex-col justify-end ${
-                !openHeader ? "scale-0" : "delay-500"
+                !openHeader ? "opacity-0" : "delay-1000"
               } ease-ease-in-out-smooth duration-500`}
             >
               <h1 className="font-semibold text-2xl -mb-2 text-end">
@@ -103,7 +103,7 @@ export default function Dashboard() {
             <div
               onClick={() => setOpenHeader(false)}
               className={`text-4xl text-teal-800 cursor-pointer ease-ease-in-out-smooth duration-300 hover:text-white ${
-                !openHeader ? "scale-0" : " delay-500"
+                !openHeader ? "opacity-0" : " delay-1000"
               }`}
             >
               <IoIosCloseCircleOutline />

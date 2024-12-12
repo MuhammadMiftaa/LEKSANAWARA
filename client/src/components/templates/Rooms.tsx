@@ -9,6 +9,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { convertToHoursMinutes, processAppliances } from "@/helper/function";
+import { ChartComponent } from "./Chart";
 // import * as moment from "moment-duration-format";
 
 export default function RoomsTabs() {
@@ -29,7 +30,6 @@ export default function RoomsTabs() {
   useEffect(() => {
     if (data?.status) {
       setAppliance(data.data);
-      console.log(data.data);
     }
   }, [data]);
   // GET request to fetch table data🐳
@@ -54,8 +54,16 @@ export default function RoomsTabs() {
     totalEnergyConsumption: 0,
     averageEnergyConsumption: 0,
     connectedDevicesCount: 0,
-    maxEnergyDevice: { "Device Name": "", "Device Type": "", "Energy Consumption (kWh)": 0 },
-    maxDurationDevice: { "Device Name": "", "Device Type": "", "Duration (Hours)": 0 },
+    maxEnergyDevice: {
+      "Device Name": "",
+      "Device Type": "",
+      "Energy Consumption (kWh)": 0,
+    },
+    maxDurationDevice: {
+      "Device Name": "",
+      "Device Type": "",
+      "Duration (Hours)": 0,
+    },
   });
   const allAppliancesFetcher = (url: string, init: RequestInit | undefined) =>
     fetch(url, init).then((res) => res.json());
@@ -90,9 +98,6 @@ export default function RoomsTabs() {
         maxEnergyDevice,
         maxDurationDevice,
       });
-
-      console.log(alldata.data);
-      console.log(analysisResult);
     }
   }, [alldata]);
   // GET request to fetch all appliances data🐳
@@ -152,10 +157,19 @@ export default function RoomsTabs() {
           <CarouselPrevious />
           <CarouselNext />
         </Carousel>
+        <div className="bg-gradient-to-br from-gradientStart to-gradientEnd w-full h-full rounded-3xl"></div>
+        <div className="col-span-2 row-span-2 w-full h-full rounded-3xl flex flex-col gap-4">
+          <div className="rounded-3xl bg-gradient-to-br from-gradientStart to-gradientEnd w-full h-full overflow-hidden">
+            <ChartComponent appliance={appliance} totalEnergy={analysisResult.totalEnergyConsumption} date={allAppliances["Usage Start Time"][0]} />
+          </div>
+          <div className="rounded-3xl bg-gradient-to-br from-gradientStart to-gradientEnd w-full h-20"></div>
+        </div>
         <div className="col-span-3 row-start-2 h-full w-full rounded-3xl bg-gradient-to-br from-gradientStart to-gradientEnd flex flex-col items-center py-3 px-6">
           <div className="flex justify-between items-center gap-4 w-full h-full">
             <div className="flex flex-col  w-full">
-              <h1 className="text-center font-light text-xl text-white mb-3">{analysisResult.maxEnergyDevice["Device Name"]}</h1>
+              <h1 className="text-center font-light text-xl text-white mb-3">
+                {analysisResult.maxEnergyDevice["Device Name"]}
+              </h1>
               <div className="flex justify-center items-center">
                 <img
                   className="h-24 object-contain mb-4 bg-gradient-to-b from-teal-300 to-teal-100 aspect-square rounded-full -mr-2"
@@ -175,7 +189,9 @@ export default function RoomsTabs() {
               </h2>
             </div>
             <div className="flex flex-col  w-full">
-              <h1 className="text-center font-light text-xl text-white mb-3">{analysisResult.maxDurationDevice["Device Name"]}</h1>
+              <h1 className="text-center font-light text-xl text-white mb-3">
+                {analysisResult.maxDurationDevice["Device Name"]}
+              </h1>
               <div className="flex justify-center items-center">
                 <img
                   className="h-24 object-contain mb-4 bg-gradient-to-b from-teal-300 to-teal-100 aspect-square rounded-full -mr-2"
@@ -184,7 +200,9 @@ export default function RoomsTabs() {
                 />
                 <h1 className="text-tealBright font-bold text-3xl p-5 border-4 border-tealBright rounded-full aspect-square bg-lightGray flex items-center justify-end flex-col">
                   {analysisResult.maxDurationDevice["Duration (Hours)"]}{" "}
-                  <span className="block font-light text-lg -mt-2.5">Hours</span>
+                  <span className="block font-light text-lg -mt-2.5">
+                    Hours
+                  </span>
                 </h1>
               </div>
               <h1 className="text-zinc-200 font-semibold text-center">

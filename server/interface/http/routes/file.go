@@ -26,6 +26,7 @@ func FileRoutes(version *gin.RouterGroup, psql *gorm.DB, redis *redis.Client) {
 	version.POST("/chat", fileHandler.Chat)
 	version.POST("/tapas-chat", fileHandler.TapasChat)
 	version.GET("/appliance", fileHandler.GetAppliance)
+	version.GET("/all-appliances", fileHandler.GetAllAppliance)
 	version.POST("/generate-daily-recommendations", fileHandler.GenerateDailyRecommendations)
 	version.POST("/generate-monthly-recommendations", fileHandler.GenerateMonthlyRecommendations)
 }

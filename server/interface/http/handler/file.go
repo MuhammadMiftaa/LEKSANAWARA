@@ -437,6 +437,25 @@ func (h *fileHandler) GetAppliance(c *gin.Context) {
 	})
 }
 
+func (h *fileHandler) GetAllAppliance(c *gin.Context) {
+	result, err := h.fileService.GetTable()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":     false,
+			"statusCode": 500,
+			"message":    err.Error() + " Error get table",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": true,
+		"statusCode": 200,
+		"message":    "Get all appliances success",
+		"data":       result,
+	})
+}
+
 func (h *fileHandler) GenerateMonthlyRecommendations(c *gin.Context) {
 	var userInputs struct {
 		Golongan   string  `json:"golongan"` // INPUT

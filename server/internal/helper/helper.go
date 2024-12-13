@@ -231,13 +231,12 @@ func PrintRecommendationsMonthlyUsage(appliances []entity.ApplianceResponse, tar
 
 	allocatedEnergy := 0.0
 	selectedAppliances := []entity.ApplianceResponse{}
-	usedTimeSlots := map[string]bool{}
 
 	// Alokasikan perangkat ke jadwal
 	for _, appliance := range appliances {
 		if allocatedEnergy+appliance.MonthlyUse <= maxEnergy {
 			allocatedEnergy += appliance.MonthlyUse
-			appliance.RecommendedSchedule = RecommendationsMonthlyUsage(appliance, timeSlots, usedTimeSlots)
+			appliance.RecommendedSchedule = RecommendationsMonthlyUsage(appliance, timeSlots)
 			selectedAppliances = append(selectedAppliances, appliance)
 		}
 	}
@@ -246,43 +245,24 @@ func PrintRecommendationsMonthlyUsage(appliances []entity.ApplianceResponse, tar
 	result := []string{}
 	result = append(result, fmt.Sprintf("Jadwal Penggunaan Appliances (Total Energi = %.2f kWh, Biaya = Rp%.2f):", allocatedEnergy, allocatedEnergy*tarif))
 	for _, appliance := range selectedAppliances {
-		result = append(result, fmt.Sprintf("Name: %s, Priority: %t, Monthly Use: %.2f kWh, Cost: Rp%.2f, Schedule: %v",
-			appliance.Name, appliance.Priority, appliance.MonthlyUse, appliance.Cost, appliance.RecommendedSchedule))
+		result = append(result, fmt.Sprintf("Name: %s, Type: %s, Priority: %t, Monthly Use: %.2f kWh, Cost: Rp%.2f, Schedule: %v",
+			appliance.Name, appliance.Type, appliance.Priority, appliance.MonthlyUse, appliance.Cost, appliance.RecommendedSchedule))
 	}
 
 	return result
 }
 
-func RecommendationsMonthlyUsage(appliance entity.ApplianceResponse, timeSlots []string, usedTimeSlots map[string]bool) []string {
+func RecommendationsMonthlyUsage(appliance entity.ApplianceResponse, timeSlots []string) []string {
 	schedule := []string{}
 
 	// Prioritaskan jadwal berdasarkan daya perangkat
 	if appliance.AverageUsage >= 1.0 { // Perangkat daya besar (>= 1 kWh rata-rata)
 		for _, slot := range []string{"18:00–24:00", "00:00–06:00"} {
-			if !usedTimeSlots[slot] {
-				schedule = append(schedule, slot)
-				usedTimeSlots[slot] = true
-				break
-			}
+			schedule = append(schedule, slot)
 		}
 	} else { // Perangkat daya kecil (< 1 kWh rata-rata)
 		for _, slot := range []string{"06:00–12:00", "12:00–18:00"} {
-			if !usedTimeSlots[slot] {
-				schedule = append(schedule, slot)
-				usedTimeSlots[slot] = true
-				break
-			}
-		}
-	}
-
-	// Jika tidak ada slot yang tersedia (fallback, meskipun ini seharusnya jarang terjadi)
-	if len(schedule) == 0 {
-		for _, slot := range timeSlots {
-			if !usedTimeSlots[slot] {
-				schedule = append(schedule, slot)
-				usedTimeSlots[slot] = true
-				break
-			}
+			schedule = append(schedule, slot)
 		}
 	}
 

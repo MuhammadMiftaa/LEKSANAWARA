@@ -1,8 +1,11 @@
 "use client";
 import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Recommendations } from "@/types/type";
+import { AnimatePresence, motion } from "framer-motion";
+import { useOutsideClick } from "@/hooks/use-outside-click";
+import { mapStringsToObjects } from "@/helper/function";
 
 export default function Analytics() {
   const golonganListrik = [
@@ -27,7 +30,7 @@ export default function Analytics() {
 
   const [targetCost, setTargetCost] = useState(48048);
   const [recommendations, setRecommendations] = useState<Recommendations>({
-    message: "a",
+    message: "",
     recommendations: [],
   });
 
@@ -112,7 +115,7 @@ export default function Analytics() {
             className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
             required
           >
-            <option value="" disabled selected>
+            <option value="Select Your Electricity Tier" disabled>
               Select Your Electricity Tier
             </option>
             {golonganListrik.map((golongan) => (
@@ -132,7 +135,7 @@ export default function Analytics() {
                 size="icon"
                 className="h-8 w-8 shrink-0 rounded-full"
                 onClick={() => onClick(-10000)}
-                disabled={targetCost <= 1000}
+                disabled={targetCost <= 100}
               >
                 <Minus />
                 <span className="sr-only">Decrease</span>
@@ -144,12 +147,12 @@ export default function Analytics() {
                   value={targetCost}
                   onChange={(e) => {
                     const newTargetCost = Math.max(
-                      1000,
+                      100,
                       Math.min(10000000, parseInt(e.target.value) || 0)
                     );
                     setTargetCost(newTargetCost);
                   }}
-                  className="w-full text-7xl font-bold tracking-tighter bg-transparent border-none focus:outline-none text-center"
+                  className="w-full text-6xl font-bold tracking-tighter bg-transparent border-none focus:outline-none text-center"
                 />
                 <div className="text-[0.70rem] uppercase text-muted-foreground -mt-5">
                   IDR/Month
@@ -175,9 +178,7 @@ export default function Analytics() {
       </form>
       <div className="bg-gradient-to-br from-lightGray to-teal-300 w-full h-full basis-2/3 rounded-3xl">
         {recommendations.message ? (
-          <div className="h-full w-full p-5">
-            <h1 className="text-2xl font-bold text-center">Your Appliance Schedule Summary</h1>
-          </div>
+          <ResultComponent data={recommendations} />
         ) : (
           <InitComponent />
         )}
@@ -186,7 +187,233 @@ export default function Analytics() {
   );
 }
 
-import React from "react";
+function ResultComponent(props: { data: Recommendations }) {
+  // const { message } = props.data;
+  const cards = mapStringsToObjects(props.data.recommendations);
+  console.log(cards);
+  const [active, setActive] = useState<(typeof cards)[number] | boolean | null>(
+    null
+  );
+  const ref = useRef<HTMLDivElement>(null);
+  const id = useId();
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setActive(false);
+      }
+    }
+
+    if (active && typeof active === "object") {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [active]);
+
+  useOutsideClick(ref, () => setActive(null));
+
+  return (
+    <div className="h-full w-full py-6">
+      <h1 className="text-2xl font-bold text-center mb-3">
+        Your Appliance Schedule Summary
+      </h1>
+
+      <AnimatePresence>
+        {active && typeof active === "object" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 h-full w-full z-40"
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {active && typeof active === "object" ? (
+          <div className="fixed inset-0  grid place-items-center z-50 ">
+            <motion.button
+              key={`button-${active.name}-${id}`}
+              layout
+              initial={{
+                opacity: 0,
+              }}
+              animate={{
+                opacity: 1,
+              }}
+              exit={{
+                opacity: 0,
+                transition: {
+                  duration: 0.05,
+                },
+              }}
+              className="flex absolute top-2 right-2 lg:hidden items-center justify-center bg-white rounded-full h-6 w-6"
+              onClick={() => setActive(null)}
+            >
+              <CloseIcon />
+            </motion.button>
+            <motion.div
+              layoutId={`card-${active.name}-${id}`}
+              ref={ref}
+              className="relative w-full max-w-[500px]  h-full md:h-fit md:max-h-[90%]  flex flex-col  bg-gradient-to-br from-lightGray via-teal-200 to-tealBright sm:rounded-3xl overflow-hidden"
+            >
+              <motion.div layoutId={`image-${active.name}-${id}`}>
+                <img
+                  width={200}
+                  height={200}
+                  src={`/appliance/${active.type}.png`}
+                  alt={active.name || ""}
+                  className="w-full h-80 lg:h-80 sm:rounded-tr-lg sm:rounded-tl-lg object-contain object-top"
+                />
+              </motion.div>
+
+              <div className="p-4">
+                <div className="flex justify-between items-center mb-6">
+                  <motion.h3
+                    layoutId={`name-${active.name}-${id}`}
+                    className="font-bold text-neutral-700 dark:text-neutral-200"
+                  >
+                    {active.name}
+                  </motion.h3>
+                  <motion.p
+                    className={`py-1 px-3 rounded-full text-black uppercase font-bold text-xs ${
+                      active.priority ? "bg-green-500" : "bg-yellow-300"
+                    }`}
+                  >
+                    {active.priority ? "High Priority" : "Low Priority"}
+                  </motion.p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-col items-center">
+                    <h1 className="text-sm font-light text-center">
+                      Total Energy (kWh) in this month
+                    </h1>
+                    <h2 className="font-bold text-lg -mt-1">
+                      {active.monthlyUse} kWh
+                    </h2>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <h1 className="text-sm font-light text-center">
+                      Total Cost (IDR) in this month
+                    </h1>
+                    <h2 className="font-bold text-lg -mt-1">
+                      {active.cost} IDR
+                    </h2>
+                  </div>
+                </div>
+                <div className="relative mt-4 px-4">
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="border-t border-black py-2 text-black text-xs md:text-sm lg:text-base h-40 md:h-fit pb-10 flex flex-col items-start overflow-auto dark:text-neutral-400 [mask:linear-gradient(to_bottom,white,white,transparent)] [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch]"
+                  >
+                    <h1 className="font-bold text-lg">Recommended Schedule</h1>
+                    <ul className="flex flex-col gap-2 justify-between">
+                      {active.schedule.length === 0 ? <h1>JANCOK</h1> : active.schedule.map((time, index) => (
+                        <li key={index} className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-gradient-to-r from-teal-500 to-tealBright rounded-full" />
+                          <p className="text-sm">{time}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                  <motion.button
+                    onClick={() => setActive(null)}
+                    layoutId={`button-${active.name}-${id}`}
+                    className="px-5 py-2 text-sm rounded-full font-bold bg-gradient-to-r from-teal-200 to-lightGray text-tealBright absolute bottom-1 right-2"
+                  >
+                    Close
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        ) : null}
+      </AnimatePresence>
+      <ul className="max-w-3xl mx-auto w-full gap-4 overflow-scroll h-[23rem]">
+        {cards.map((card) => (
+          <motion.div
+            layoutId={`card-${card.name}-${id}`}
+            key={`card-${card.name}-${id}`}
+            onClick={() => setActive(card)}
+            className="p-4 flex flex-col md:flex-row justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-xl cursor-pointer"
+          >
+            <div className="flex gap-4 flex-col md:flex-row ">
+              <motion.div layoutId={`image-${card.name}-${id}`}>
+                <img
+                  width={100}
+                  height={100}
+                  src={`/appliance/${card.type}.png`}
+                  alt={card.name || ""}
+                  className="h-40 w-40 md:h-14 md:w-14 rounded-lg object-cover object-top"
+                />
+              </motion.div>
+              <div className="">
+                <motion.h3
+                  layoutId={`name-${card.name}-${id}`}
+                  className="font-medium text-neutral-800 dark:text-neutral-200 text-center md:text-left"
+                >
+                  {card.name}
+                </motion.h3>
+                <motion.p
+                  className={`py-1 px-3 rounded-full text-black uppercase font-bold text-xs ${
+                    card.priority ? "bg-green-500" : "bg-yellow-300"
+                  }`}
+                >
+                  {card.priority ? "High Priority" : "Low Priority"}
+                </motion.p>
+              </div>
+            </div>
+            <motion.button
+              layoutId={`button-${card.name}-${id}`}
+              className="px-4 py-2 text-sm rounded-full font-bold bg-gray-100 hover:bg-gradient-to-r hover:from-teal-200 hover:to-tealBright hover:text-white text-black mt-4 md:mt-0"
+            >
+              {card.ctaText}
+            </motion.button>
+          </motion.div>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export const CloseIcon = () => {
+  return (
+    <motion.svg
+      initial={{
+        opacity: 0,
+      }}
+      animate={{
+        opacity: 1,
+      }}
+      exit={{
+        opacity: 0,
+        transition: {
+          duration: 0.05,
+        },
+      }}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4 text-black"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M18 6l-12 12" />
+      <path d="M6 6l12 12" />
+    </motion.svg>
+  );
+};
 
 function InitComponent() {
   return (

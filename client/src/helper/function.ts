@@ -1,4 +1,8 @@
-import { AllAppliances, Appliance, OverusedDevices } from "@/types/type";
+import {
+  AllAppliances,
+  Appliance,
+  OverusedDevices,
+} from "@/types/type";
 
 export function convertToHoursMinutes(decimalHours: number): string {
   const hours = Math.floor(decimalHours);
@@ -167,4 +171,30 @@ export function findOverusedDevices(
   });
 
   return overusedDevices;
+}
+
+export function mapStringsToObjects(data: string[]) {
+  return data.map((item) => {
+    const nameMatch = item.match(/Name: ([^,]+)/);
+    const typeMatch = item.match(/Type: ([^,]+)/);
+    const priorityMatch = item.match(/Priority: (true|false)/);
+    const monthlyUseMatch = item.match(/Monthly Use: ([\d\.]+) kWh/);
+    const costMatch = item.match(/Cost: Rp([\d\.]+)/);
+    const scheduleMatch = item.match(/Schedule: \[([^\]]*)\]/);
+
+    return {
+      name: nameMatch ? nameMatch[1] : null,
+      type: typeMatch ? typeMatch[1] : null,
+      priority: priorityMatch ? priorityMatch[1] === "true" : null,
+      monthlyUse: monthlyUseMatch ? parseFloat(monthlyUseMatch[1]) : null,
+      cost: costMatch ? parseFloat(costMatch[1]) : null,
+      ctaText: "Detail",
+      schedule: scheduleMatch
+        ? scheduleMatch[1]
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [],
+    };
+  });
 }

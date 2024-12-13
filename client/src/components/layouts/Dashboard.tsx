@@ -54,8 +54,8 @@ export default function Dashboard() {
   return (
     <div className="bg-lightGray absolute inset-0 p-4 font-poppins flex flex-col gap-4">
       <div
-        className={`inset-x-4 bg-lightGray absolute z-10 ease-ease-in-out-smooth duration-1000 ${
-          openHeader ? "w-[97.5%] h-24" : "h-24 w-24 rounded-bottom-right-2xl "
+        className={`inset-x-4 bg-lightGray absolute ease-ease-in-out-smooth duration-1000 ${
+          openHeader ? "w-[97.5%] h-24" : "z-10 h-24 w-24 rounded-bottom-right-2xl "
         }`}
       >
         <div

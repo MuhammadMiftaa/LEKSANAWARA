@@ -10,6 +10,12 @@ import {
 } from "@/components/ui/tooltip";
 
 export default function Upload() {
+
+  const handleLogout = (): void => {
+    document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    window.location.href = "/login";
+  };
+
   const [files, setFiles] = useState<File[]>([]);
   const handleFileUpload = async (files: File[]) => {
     setFiles(files);
@@ -64,7 +70,7 @@ export default function Upload() {
         </div>
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger className="z-50 font-light uppercase absolute bottom-2 right-4 text-base text-zinc-200 hover:underline">Logout</TooltipTrigger>
+            <TooltipTrigger onClick={handleLogout} className="z-50 font-light uppercase absolute bottom-2 right-4 text-base text-zinc-200 hover:underline">Logout</TooltipTrigger>
             <TooltipContent>
               <p>Log out of your account securely</p>
             </TooltipContent>

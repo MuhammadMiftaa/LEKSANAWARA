@@ -41,3 +41,8 @@ type UsageMetadata struct {
 	PromptTokenCount     int `json:"promptTokenCount"`
 	TotalTokenCount      int `json:"totalTokenCount"`
 }
+
+type OTP struct {
+	Email    string `json:"email"`
+	OTP      string `json:"otp"`
+}

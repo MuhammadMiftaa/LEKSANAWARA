@@ -21,6 +21,7 @@ func SetupRouter(psql *gorm.DB, redis *redis.Client) *gin.Engine {
 	})
 
 	v1 := router.Group("/v1")
+	routes.UserRoutes(v1, psql, redis)
 	routes.FileRoutes(v1, psql, redis)
 
 	return router

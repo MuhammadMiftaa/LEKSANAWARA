@@ -25,7 +25,7 @@ func SetupDatabase() (*gorm.DB, error) {
 		log.Fatalf("Gagal terhubung ke database: %v", err)
 	}
 
-	if err := db.AutoMigrate(&entity.Appliance{}); err != nil {
+	if err := db.AutoMigrate(&entity.Appliance{}, &entity.Users{}); err != nil {
 		log.Fatalf("Error saat melakukan migrasi: %v", err)
 	}
 

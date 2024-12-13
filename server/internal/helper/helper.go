@@ -215,29 +215,34 @@ func JumlahHariDalamBulan(tanggal string) (int, error) {
 func PrintRecommendationsMonthlyUsage(appliances []entity.ApplianceResponse, tarif float64, daysInMonth int, maxEnergy float64) []string {
 	timeSlots := []string{"00:00–06:00", "06:00–12:00", "12:00–18:00", "18:00–24:00"}
 
+	// Hitung penggunaan bulanan dan biaya untuk setiap perangkat
 	for i := range appliances {
 		appliances[i].MonthlyUse = appliances[i].AverageUsage * float64(daysInMonth)
 		appliances[i].Cost = appliances[i].MonthlyUse * tarif
 	}
 
+	// Urutkan perangkat berdasarkan prioritas (true > false) lalu penggunaan daya (desc)
 	sort.Slice(appliances, func(i, j int) bool {
 		if appliances[i].Priority == appliances[j].Priority {
-			return appliances[i].MonthlyUse < appliances[j].MonthlyUse
+			return appliances[i].AverageUsage > appliances[j].AverageUsage
 		}
 		return appliances[i].Priority
 	})
 
 	allocatedEnergy := 0.0
 	selectedAppliances := []entity.ApplianceResponse{}
+	usedTimeSlots := map[string]bool{}
 
+	// Alokasikan perangkat ke jadwal
 	for _, appliance := range appliances {
 		if allocatedEnergy+appliance.MonthlyUse <= maxEnergy {
 			allocatedEnergy += appliance.MonthlyUse
-			appliance.RecommendedSchedule = RecommendationsMonthlyUsage(appliance, timeSlots)
+			appliance.RecommendedSchedule = RecommendationsMonthlyUsage(appliance, timeSlots, usedTimeSlots)
 			selectedAppliances = append(selectedAppliances, appliance)
 		}
 	}
 
+	// Buat hasil output
 	result := []string{}
 	result = append(result, fmt.Sprintf("Jadwal Penggunaan Appliances (Total Energi = %.2f kWh, Biaya = Rp%.2f):", allocatedEnergy, allocatedEnergy*tarif))
 	for _, appliance := range selectedAppliances {
@@ -248,35 +253,40 @@ func PrintRecommendationsMonthlyUsage(appliances []entity.ApplianceResponse, tar
 	return result
 }
 
-func RecommendationsMonthlyUsage(appliance entity.ApplianceResponse, timeSlots []string) []string {
-	recommended := []string{}
-	remainingUsage := appliance.DailyUseTarget
-	distribution := map[string]float64{
-		"00:00–06:00": 1.0,
-		"06:00–12:00": 1.0,
-		"12:00–18:00": 1.0,
-		"18:00–24:00": 1.0,
-	}
+func RecommendationsMonthlyUsage(appliance entity.ApplianceResponse, timeSlots []string, usedTimeSlots map[string]bool) []string {
+	schedule := []string{}
 
-	// Atur distribusi berdasarkan jenis dan lokasi appliance
-	if appliance.Type == "Lampu" {
-		distribution["18:00–24:00"] += 0.5
-	} else if appliance.Type == "AC" {
-		distribution["00:00–06:00"] += 0.7
-		distribution["18:00–24:00"] += 0.3
-	} else if appliance.Type == "Mesin Cuci" {
-		distribution["06:00–12:00"] += 0.5
-	}
-
-	// Alokasi slot waktu berdasarkan distribusi
-	for _, slot := range timeSlots {
-		if remainingUsage > 0 && distribution[slot] > 0 {
-			recommended = append(recommended, slot)
-			remainingUsage -= 2.0 * distribution[slot]
+	// Prioritaskan jadwal berdasarkan daya perangkat
+	if appliance.AverageUsage >= 1.0 { // Perangkat daya besar (>= 1 kWh rata-rata)
+		for _, slot := range []string{"18:00–24:00", "00:00–06:00"} {
+			if !usedTimeSlots[slot] {
+				schedule = append(schedule, slot)
+				usedTimeSlots[slot] = true
+				break
+			}
+		}
+	} else { // Perangkat daya kecil (< 1 kWh rata-rata)
+		for _, slot := range []string{"06:00–12:00", "12:00–18:00"} {
+			if !usedTimeSlots[slot] {
+				schedule = append(schedule, slot)
+				usedTimeSlots[slot] = true
+				break
+			}
 		}
 	}
 
-	return recommended
+	// Jika tidak ada slot yang tersedia (fallback, meskipun ini seharusnya jarang terjadi)
+	if len(schedule) == 0 {
+		for _, slot := range timeSlots {
+			if !usedTimeSlots[slot] {
+				schedule = append(schedule, slot)
+				usedTimeSlots[slot] = true
+				break
+			}
+		}
+	}
+
+	return schedule
 }
 
 func PrintRecommendationsDailyUsage(appliances []entity.ApplianceResponse, tariff float64) []DailySummary {

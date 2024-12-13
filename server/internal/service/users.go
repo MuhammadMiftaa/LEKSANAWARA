@@ -13,7 +13,7 @@ import (
 type UsersService interface {
 	Register(user entity.UsersRequest) (entity.Users, error)
 	Login(user entity.UsersRequest) (*string, error)
-	OAuthLogin(name string, email string) (*string, error)
+	OAuthLogin(name string, email string, premium bool) (*string, error)
 	GetAllUsers() ([]entity.Users, error)
 	GetUserByID(id string) (entity.Users, error)
 	GetUserByEmail(email string) (entity.Users, error)
@@ -93,7 +93,7 @@ func (user_serv *usersService) Login(user entity.UsersRequest) (*string, error) 
 		return nil, errors.New("password is incorrect")
 	}
 
-	token, err := helper.GenerateToken(userExist.Name, userExist.Email)
+	token, err := helper.GenerateToken(userExist.Name, userExist.Email, userExist.Premium)
 	if err != nil {
 		return nil, err
 	}
@@ -101,8 +101,8 @@ func (user_serv *usersService) Login(user entity.UsersRequest) (*string, error) 
 	return &token, nil
 }
 
-func (user_serv *usersService) OAuthLogin(name string, email string) (*string, error) {
-	token, err := helper.GenerateToken(name, email)
+func (user_serv *usersService) OAuthLogin(name string, email string, premium bool) (*string, error) {
+	token, err := helper.GenerateToken(name, email, premium)
 	if err != nil {
 		return nil, err
 	}

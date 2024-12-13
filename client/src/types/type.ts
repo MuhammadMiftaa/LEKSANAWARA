@@ -43,3 +43,12 @@ export type Recommendations = {
   message: string;
   recommendations: string[];
 };
+
+export type JwtPayload = {
+  sub?: string;
+  iat?: number;
+  exp?: number;
+  email: string;
+  username: string;
+  premium: boolean;
+}

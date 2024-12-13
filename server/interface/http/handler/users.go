@@ -163,7 +163,7 @@ func (user_handler *usersHandler) CallbackGoogle(c *gin.Context) {
 		return
 	}
 
-	tokenJWT, err := user_handler.usersService.OAuthLogin(userInfo["name"].(string), userInfo["email"].(string))
+	tokenJWT, err := user_handler.usersService.OAuthLogin(userInfo["name"].(string), userInfo["email"].(string), false)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"statusCode": 400,

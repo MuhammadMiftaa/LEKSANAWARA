@@ -228,7 +228,7 @@ function ResultComponent(props: { data: Recommendations }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/70 h-full w-full z-40"
+            className="fixed inset-0 h-full w-full z-40"
           />
         )}
       </AnimatePresence>
@@ -258,7 +258,7 @@ function ResultComponent(props: { data: Recommendations }) {
             <motion.div
               layoutId={`card-${active.name}-${id}`}
               ref={ref}
-              className="relative w-full max-w-[500px]  h-full md:h-fit md:max-h-[90%]  flex flex-col  bg-gradient-to-br from-lightGray via-teal-200 to-tealBright sm:rounded-3xl overflow-hidden"
+              className="relative w-full max-w-[500px] border-4 border-teal-600 h-[38rem] flex flex-col  bg-gradient-to-br from-lightGray via-teal-200 to-tealBright sm:rounded-3xl"
             >
               <motion.div layoutId={`image-${active.name}-${id}`}>
                 <img
@@ -304,7 +304,7 @@ function ResultComponent(props: { data: Recommendations }) {
                     </h2>
                   </div>
                 </div>
-                <div className="relative mt-4 px-4">
+                <div className="mt-4 px-4">
                   <motion.div
                     layout
                     initial={{ opacity: 0 }}
@@ -313,8 +313,8 @@ function ResultComponent(props: { data: Recommendations }) {
                     className="border-t border-black py-2 text-black text-xs md:text-sm lg:text-base h-40 md:h-fit pb-10 flex flex-col items-start overflow-auto dark:text-neutral-400 [mask:linear-gradient(to_bottom,white,white,transparent)] [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch]"
                   >
                     <h1 className="font-bold text-lg">Recommended Schedule</h1>
-                    <ul className="flex flex-col gap-2 justify-between">
-                      {active.schedule.length === 0 ? <h1>JANCOK</h1> : active.schedule.map((time, index) => (
+                    <ul className="gap-2 justify-between">
+                      {active.schedule[0].split(" ").map((time, index) => (
                         <li key={index} className="flex items-center gap-2">
                           <div className="w-4 h-4 bg-gradient-to-r from-teal-500 to-tealBright rounded-full" />
                           <p className="text-sm">{time}</p>
@@ -325,7 +325,7 @@ function ResultComponent(props: { data: Recommendations }) {
                   <motion.button
                     onClick={() => setActive(null)}
                     layoutId={`button-${active.name}-${id}`}
-                    className="px-5 py-2 text-sm rounded-full font-bold bg-gradient-to-r from-teal-200 to-lightGray text-tealBright absolute bottom-1 right-2"
+                    className="px-5 py-2 text-sm rounded-full font-bold bg-gradient-to-r from-teal-200 to-lightGray text-tealBright absolute bottom-4 right-4"
                   >
                     Close
                   </motion.button>
@@ -335,7 +335,7 @@ function ResultComponent(props: { data: Recommendations }) {
           </div>
         ) : null}
       </AnimatePresence>
-      <ul className="max-w-3xl mx-auto w-full gap-4 overflow-scroll h-[23rem]">
+      <ul className="max-w-3xl mx-auto w-full gap-4 overflow-scroll h-[90%]">
         {cards.map((card) => (
           <motion.div
             layoutId={`card-${card.name}-${id}`}
@@ -361,7 +361,7 @@ function ResultComponent(props: { data: Recommendations }) {
                   {card.name}
                 </motion.h3>
                 <motion.p
-                  className={`py-1 px-3 rounded-full text-black uppercase font-bold text-xs ${
+                  className={`py-1 px-3 rounded-full text-black uppercase font-bold text-xs w-fit ${
                     card.priority ? "bg-green-500" : "bg-yellow-300"
                   }`}
                 >

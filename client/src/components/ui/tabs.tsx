@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { BiSolidBot } from "react-icons/bi";
 import { Drawer } from "flowbite-react";
 import ChatComponent from "./chat-form";
+import { JwtPayload } from "@/types/type";
 
 type Tab = {
   title: string;
@@ -21,6 +22,7 @@ export const Tabs = ({
   tabClassName,
   contentClassName,
   openHeader,
+  payload,
 }: {
   tabs: Tab[];
   containerClassName?: string;
@@ -28,6 +30,7 @@ export const Tabs = ({
   tabClassName?: string;
   contentClassName?: string;
   openHeader?: boolean;
+  payload?: JwtPayload;
 }) => {
   const [active, setActive] = useState<Tab>(propTabs[0]);
   const [tabs, setTabs] = useState<Tab[]>(propTabs);
@@ -130,9 +133,18 @@ export const Tabs = ({
             !openHeader ? "top-7" : "top-2"
           }`}
         >
-          <button className="inline-flex h-10 mr-4 animate-shimmer items-center justify-center rounded-xl border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
-            Unlock Premium
-          </button>
+          {payload?.premium ? (
+            <button className="p-[3px] relative mr-4">
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-red-500 rounded-lg" />
+              <div className="px-8 py-2  bg-teal-300 rounded-[6px] font-semibold relative group transition duration-200 text-black hover:bg-transparent">
+                Access Special Features
+              </div>
+            </button>
+          ) : (
+            <button className="inline-flex h-10 mr-4 animate-shimmer items-center justify-center rounded-xl border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
+              Unlock Premium
+            </button>
+          )}
           <Button
             onClick={() => setIsOpen(true)}
             className=" rounded-xl"

@@ -15,6 +15,7 @@ import {
 } from "@/helper/function";
 import { ChartComponent } from "./Chart";
 import { OverusedDeviceComponent } from "./OverusedDevice";
+import { NumberTicker } from "../ui/number-ticker";
 // import * as moment from "moment-duration-format";
 
 export default function RoomsTabs() {
@@ -191,21 +192,31 @@ export default function RoomsTabs() {
                   : "shadow-green-600"
               } h-28 w-28 bg-gradient-to-br from-gradientStart to-gradientEnd rounded-full flex justify-center items-center shadow-inner-strong`}
             >
-              <h1
+              <div
                 className={`${
                   overusedDevices.percentage > 50
                     ? "text-red-600"
                     : "text-green-600"
                 } font-bold text-3xl relative`}
               >
-                {overusedDevices.percentage}%
+                {overusedDevices.percentage && (
+                  <NumberTicker
+                    className={`${
+                      overusedDevices.percentage > 50
+                        ? "text-red-600"
+                        : "text-green-600"
+                    } font-bold text-3xl relative`}
+                    value={overusedDevices.percentage}
+                  />
+                )}
+                %
                 <span className="text-xl absolute -bottom-5 left-1/2 -translate-x-1/2 cursor-pointer">
                   <OverusedDeviceComponent
                     data={overusedDevices.devices}
                     appliancesLength={allAppliances["Device ID"].length}
                   />
                 </span>
-              </h1>
+              </div>
             </div>
           </div>
           {overusedDevices.percentage > 50 ? (

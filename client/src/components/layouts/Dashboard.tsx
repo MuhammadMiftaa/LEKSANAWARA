@@ -5,6 +5,8 @@ import useSWR from "swr";
 import { Tabs } from "../ui/tabs";
 import RoomsTabs from "../templates/Rooms";
 import Analytics from "./Analytics";
+import { jwtDecode } from "jwt-decode";
+import { JwtPayload } from "../../types/type";
 
 export default function Dashboard() {
   // GET request to fetch table data🐳
@@ -51,11 +53,43 @@ export default function Dashboard() {
     },
   ];
 
+  // const [JWTSecret, setJWTSecret] = useState<string>(getJWTSecret());
+  const [payload, setPayload] = useState<JwtPayload>({
+    email: "",
+    username: "",
+    premium: false,
+  });
+
+  function decodeJwt(token: string): JwtPayload | null {
+    try {
+      const decoded = jwtDecode(token);
+      return decoded as JwtPayload;
+    } catch (error) {
+      console.error("Invalid JWT token:", error);
+      return null;
+    }
+  }
+
+  useEffect(() => {
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("token="))
+      ?.split("=")[1];
+    if (token) {
+      const payload = decodeJwt(token);
+      if (payload) {
+        setPayload(payload);
+      }
+    }
+  }, []);
+
   return (
     <div className="bg-lightGray absolute inset-0 p-4 font-poppins flex flex-col gap-4">
       <div
         className={`inset-x-4 bg-lightGray absolute ease-ease-in-out-smooth duration-1000 ${
-          openHeader ? "w-[97.5%] h-24" : "z-10 h-24 w-24 rounded-bottom-right-2xl "
+          openHeader
+            ? "w-[97.5%] h-24"
+            : "z-10 h-24 w-24 rounded-bottom-right-2xl "
         }`}
       >
         <div
@@ -79,22 +113,28 @@ export default function Dashboard() {
                 <h2 className="font-light text-2xl text-zinc-800">
                   Welcome in,
                 </h2>
-                <h1 className="font-semibold text-2xl">Muhammad Mifta</h1>
+                <h1 className="font-semibold text-2xl">{payload?.username}</h1>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <div
-              className={`flex flex-col justify-end ${
+              className={`flex flex-col justify-center ${
                 !openHeader ? "opacity-0" : "delay-1000"
               } ease-ease-in-out-smooth duration-500`}
             >
-              <h1 className="font-semibold text-2xl -mb-2 text-end">
-                Free Account
-              </h1>
-              <h2 className="font-light text-zinc-800 text-end">
-                Limited Features
-              </h2>
+              {!payload?.premium ? (
+                <>
+                  <h1 className="font-semibold text-2xl -mb-2 text-end">
+                    Free Account
+                  </h1>
+                  <h2 className="font-light text-zinc-800 text-end">
+                    Limited Features
+                  </h2>
+                </>
+              ) : (
+                <h1 className="uppercase font-bold px-3 py-1 rounded-xl bg-gradient-to-br from-yellow-300 via-yellow-100 tracking-wide mr-2 to-yellow-300 text-lg">Premium</h1>
+              )}
             </div>
             <div
               onClick={() => setOpenHeader(false)}
@@ -118,6 +158,7 @@ export default function Dashboard() {
         {table ? (
           <div className="h-full w-full relative b flex flex-col items-start justify-start">
             <Tabs
+            payload={payload}
               tabs={tabs}
               containerClassName={`${!openHeader ? "h-28" : "h-16"}`}
               openHeader={openHeader}

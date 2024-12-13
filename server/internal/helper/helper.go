@@ -374,13 +374,13 @@ func ConvertToResponseType(data interface{}) interface{} {
 	}
 }
 
-var secretKey = "pojq09720ef1ko0f1h9iego2010j20240"
-
-func GenerateToken(username string, email string) (string, error) {
+func GenerateToken(username string, email string, premium bool) (string, error) {
+	secretKey := os.Getenv("JWT_SECRET")
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := jwt.MapClaims{
 		"username": username,
 		"email":    email,
+		"premium":  premium,
 		"exp":      expirationTime.Unix(),
 	}
 
@@ -395,6 +395,7 @@ func GenerateToken(username string, email string) (string, error) {
 }
 
 func VerifyToken(cookie string) (interface{}, error) {
+	secretKey := os.Getenv("JWT_SECRET")
 	token, _ := jwt.Parse(cookie, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("sign in to preceed")

@@ -120,7 +120,7 @@ export default function SignUpPage(props: {
     <Navigate to={"/"} />
   ) : (
     <div
-      className="min-h-screen flex after:content-[''] after:block after:absolute after:inset-0 after:bg-black after:bg-opacity-40"
+      className="h-screen flex after:content-[''] after:block after:absolute after:inset-0 after:bg-black after:bg-opacity-40"
       style={{
         backgroundImage: "url('/background.jpg')",
         backgroundSize: "cover",
@@ -128,10 +128,10 @@ export default function SignUpPage(props: {
         backgroundRepeat: "no-repeat",
       }}
     >
-      <div className="w-[45%] my-20 min-h-96 rounded-xl backdrop-blur bg-white/30 mx-auto z-10 font-inter flex flex-col justify-center">
+      <div className="w-[45%] my-auto h-fit rounded-xl backdrop-blur bg-white/30 mx-auto z-10 font-inter flex flex-col justify-center">
         <div className="p-8">
           {submited ? (
-            <>
+            <div className="my-8">
               <h1 className="text-4xl pb-2 font-bold text-center bg-clip-text text-transparent from-white to-teal-500 bg-gradient-to-r from-20%">
                 Verify Your Email Address
               </h1>
@@ -229,7 +229,7 @@ export default function SignUpPage(props: {
                   </button>
                 </p> */}
               </form>
-            </>
+            </div>
           ) : (
             <>
               <h1 className="text-5xl pb-2 font-bold text-center bg-clip-text text-transparent from-white to-teal-500 bg-gradient-to-r from-20%">

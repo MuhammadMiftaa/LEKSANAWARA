@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import useSWR from "swr";
 import { Tabs } from "../ui/tabs";
 import RoomsTabs from "../templates/Rooms";
+import Analytics from "./Analytics";
 
 export default function Dashboard() {
   // GET request to fetch table data🐳
@@ -30,22 +31,17 @@ export default function Dashboard() {
   const tabs = [
     {
       title: "Rooms",
-      value: "Rooms",
+      value: "rooms",
       content: <RoomsTabs />,
     },
     {
       title: "Analytics",
-      value: "Analytics",
-      content: (
-        <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-white bg-transparent">
-          <p>Analytics tab</p>
-          <DummyContent />
-        </div>
-      ),
+      value: "analytics",
+      content: <Analytics />,
     },
     {
       title: "Recommendations",
-      value: "Recommendations",
+      value: "recommendations",
       content: (
         <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-white bg-transparent">
           <p>Recommendations tab</p>

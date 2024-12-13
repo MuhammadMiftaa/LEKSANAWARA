@@ -38,3 +38,8 @@ export type OverusedDevices = {
   usageStartTime: string;
   usageEndTime: string;
 };
+
+export type Recommendations = {
+  message: string;
+  recommendations: string[];
+};

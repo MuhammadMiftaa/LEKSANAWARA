@@ -234,7 +234,7 @@ export default function RoomsTabs() {
             }).map((location, index) => (
               <h1
                 key={index}
-                className="font-semibold text-xl py-1 px-3 text-center text-nowrap rounded-2xl bg-gradient-to-b from-lightGray to-teal-300"
+                className="font-semibold py-2 px-5 text-center text-nowrap rounded-2xl bg-gradient-to-b from-lightGray to-teal-300"
               >
                 {location}
               </h1>

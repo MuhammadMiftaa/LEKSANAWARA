@@ -1,8 +1,6 @@
-import {
-  AllAppliances,
-  Appliance,
-  OverusedDevices,
-} from "@/types/type";
+import { AllAppliances, Appliance, OverusedDevices } from "@/types/type";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export function convertToHoursMinutes(decimalHours: number): string {
   const hours = Math.floor(decimalHours);
@@ -178,8 +176,8 @@ export function mapStringsToObjects(data: string[]) {
     const nameMatch = item.match(/Name: ([^,]+)/);
     const typeMatch = item.match(/Type: ([^,]+)/);
     const priorityMatch = item.match(/Priority: (true|false)/);
-    const monthlyUseMatch = item.match(/Monthly Use: ([\d\.]+) kWh/);
-    const costMatch = item.match(/Cost: Rp([\d\.]+)/);
+    const monthlyUseMatch = item.match(/Monthly Use: ([\d.]+) kWh/);
+    const costMatch = item.match(/Cost: Rp([\d.]+)/);
     const scheduleMatch = item.match(/Schedule: \[([^\]]*)\]/);
 
     return {
@@ -197,4 +195,129 @@ export function mapStringsToObjects(data: string[]) {
         : [],
     };
   });
+}
+
+export function convertApplianceStringToObject(input: string) {
+  const regex =
+    /Name: (.+?), Type: (.+?), Priority: (true|false), Monthly Use: (.+?) kWh, Cost: Rp(.+?), Schedule: \[(.+)\]/;
+
+  const match = input.match(regex);
+
+  if (!match) {
+    throw new Error("String tidak sesuai format yang diharapkan.");
+  }
+
+  const [_, name, type, priority, monthlyUse, cost, schedule] = match;
+
+  return {
+    name: name.trim(),
+    type: type.trim(),
+    priority: priority === "true",
+    monthlyUse: parseFloat(monthlyUse),
+    cost: parseFloat(cost),
+    schedule: schedule.split(" ").map((slot) => slot.trim()),
+  };
+}
+
+interface ApplianceJSON {
+  name: string;
+  type: string;
+  priority: boolean;
+  monthlyUse: number;
+  cost: number;
+  schedule: string[];
+}
+
+interface SummaryJSON {
+  total_energy: number;
+  total_cost: string;
+  message: string;
+}
+
+interface DataJSON {
+  summary: SummaryJSON;
+  appliances: ApplianceJSON[];
+}
+
+export function exportToPDF(data: DataJSON, fileName: string = "Report") {
+  const doc = new jsPDF();
+
+  // Menambahkan logo (jika ada)
+  const logoURL = "/logo.webp"; // Ganti dengan path logo Anda
+  doc.addImage(logoURL, "PNG", 10, 12, 10, 10);
+
+  // Menambahkan judul laporan
+  doc.setFontSize(22);
+  doc.setTextColor(41, 128, 185); // Warna biru untuk judul
+  doc.text("Jadwal Penggunaan Appliances", 105, 20, { align: "center" });
+
+  // Menambahkan garis pemisah
+  doc.setDrawColor(41, 128, 185);
+  doc.setLineWidth(1.5);
+  doc.line(10, 25, 200, 25); // Garis horizontal
+
+  // Menambahkan ringkasan
+  doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0);
+  doc.text(
+    `Total Energy: ${data.summary.total_energy
+      .toFixed(2)
+      .replace(".", ",")} (kWh)`,
+    14,
+    40
+  );
+  doc.text(`Total Cost: IDR ${data.summary.total_cost}`, 14, 47);
+
+  // Menyiapkan header tabel dan data tabel
+  const tableHeaders = [
+    "Name",
+    "Type",
+    "Priority",
+    "Monthly Use (kWh)",
+    "Cost (IDR)",
+    "Schedule",
+  ];
+  const tableData = data.appliances.map((appliance) => [
+    appliance.name,
+    appliance.type,
+    appliance.priority ? "High" : "Low",
+    appliance.monthlyUse.toFixed(2).replace(".", ","),
+    appliance.cost.toFixed(2).replace(".", ","),
+    appliance.schedule.join(", "),
+  ]);
+
+  // Menambahkan tabel dengan styling
+  autoTable(doc, {
+    startY: 55, // Posisi awal tabel
+    head: [tableHeaders], // Header tabel
+    body: tableData, // Isi tabel
+    theme: "grid", // Tema tabel
+    headStyles: {
+      fillColor: [41, 128, 185], // Warna header (biru)
+      textColor: 255, // Warna teks header (putih)
+      fontSize: 12,
+      fontStyle: "bold",
+    },
+    bodyStyles: {
+      textColor: [0, 0, 0], // Warna teks body (hitam)
+      fontSize: 11,
+    },
+    alternateRowStyles: {
+      fillColor: [240, 240, 240], // Warna abu-abu untuk baris selang-seling
+    },
+    margin: { top: 10, bottom: 20 },
+  });
+
+  // Tambahkan footer
+  const pageHeight = doc.internal.pageSize.height;
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text(
+    `Generated on: ${new Date().toLocaleDateString()}`,
+    14,
+    pageHeight - 10
+  );
+
+  // Menyimpan file PDF
+  doc.save(`${fileName}.pdf`);
 }

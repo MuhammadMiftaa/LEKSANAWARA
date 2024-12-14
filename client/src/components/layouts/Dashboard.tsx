@@ -3,7 +3,7 @@ import { IoIosCloseCircleOutline } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
 import useSWR from "swr";
 import { Tabs } from "../ui/tabs";
-import RoomsTabs from "../templates/Rooms";
+import RoomsTabs from "./Rooms";
 import Analytics from "./Analytics";
 import { jwtDecode } from "jwt-decode";
 import { JwtPayload } from "../../types/type";
@@ -78,13 +78,13 @@ export default function Dashboard() {
       content: <RoomsTabs />,
     },
     {
-      title: "Analytics",
-      value: "analytics",
+      title: "Schedule",
+      value: "schedule",
       content: <Analytics />,
     },
     {
-      title: "Recommendations",
-      value: "recommendations",
+      title: "Analyze",
+      value: "analyze",
       content: <Recommendations userEmail={payload?.email} />,
     },
   ];

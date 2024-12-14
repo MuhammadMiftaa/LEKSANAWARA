@@ -5,7 +5,12 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Recommendations } from "@/types/type";
 import { AnimatePresence, motion } from "framer-motion";
 import { useOutsideClick } from "@/hooks/use-outside-click";
-import { mapStringsToObjects } from "@/helper/function";
+import {
+  convertApplianceStringToObject,
+  exportToPDF,
+  mapStringsToObjects,
+} from "@/helper/function";
+import { FaRegFilePdf } from "react-icons/fa6";
 
 export default function Analytics() {
   const golonganListrik = [
@@ -91,6 +96,42 @@ export default function Analytics() {
       console.error("Error:", error);
       alert("Failed to generate recommendations.");
     }
+  }
+
+  function handleExportPDF() {
+    const energyRegex = /Total Energi = ([\d.]+) kWh/; // Regex untuk total energi
+
+    // Pastikan `recommendations.message` adalah string
+    if (typeof recommendations.message !== "string") {
+      console.error("Invalid recommendations.message format");
+      return;
+    }
+
+    // Ekstraksi energi dan biaya
+    const energyMatch = recommendations.message.match(energyRegex);
+
+    const totalEnergy = energyMatch ? parseFloat(energyMatch[1]) : 0;
+
+    // Parsing total cost dengan benar
+    const totalCost = recommendations.message.split("Rp")[1].split(")")[0];
+
+    // Konversi data appliances menjadi objek
+    const appliances = recommendations.recommendations.map((recommendation) => {
+      return convertApplianceStringToObject(recommendation);
+    });
+
+    // Struktur data untuk PDF
+    const data = {
+      summary: {
+        message: recommendations.message.split(" ").slice(0, 3).join(" "), // Ambil 3 kata pertama untuk ringkasan
+        total_energy: totalEnergy,
+        total_cost: totalCost,
+      },
+      appliances, // Data appliances hasil konversi
+    };
+
+    // Ekspor ke PDF
+    exportToPDF(data);
   }
 
   return (
@@ -179,7 +220,10 @@ export default function Analytics() {
       </form>
       <div className="bg-gradient-to-br from-lightGray to-teal-300 w-full h-full basis-2/3 rounded-3xl">
         {recommendations.message ? (
-          <ResultComponent data={recommendations} />
+          <ResultComponent
+            data={recommendations}
+            handleExportPDF={handleExportPDF}
+          />
         ) : (
           <InitComponent />
         )}
@@ -188,8 +232,10 @@ export default function Analytics() {
   );
 }
 
-function ResultComponent(props: { data: Recommendations }) {
-  // const { message } = props.data;
+function ResultComponent(props: {
+  data: Recommendations;
+  handleExportPDF: () => void;
+}) {
   const cards = mapStringsToObjects(props.data.recommendations);
   const [active, setActive] = useState<(typeof cards)[number] | boolean | null>(
     null
@@ -218,9 +264,19 @@ function ResultComponent(props: { data: Recommendations }) {
 
   return (
     <div className="h-full w-full py-6">
-      <h1 className="text-2xl font-bold text-center mb-3">
-        Your Appliance Schedule Summary
-      </h1>
+      <div className="flex items-center justify-center gap-4 mb-3 relative">
+        <h1 className="text-2xl font-bold text-center">
+          Your Appliance Schedule Summary
+        </h1>
+        <button
+          onClick={props.handleExportPDF}
+          type="button"
+          className="py-1 px-2.5 text-red-500 rounded-lg border-red-500 hover:text-black duration-500 flex items-center gap-1 absolute right-2"
+        >
+          Download
+          <FaRegFilePdf />
+        </button>
+      </div>
 
       <AnimatePresence>
         {active && typeof active === "object" && (

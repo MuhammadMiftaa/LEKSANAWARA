@@ -29,7 +29,7 @@ export function OverusedDeviceComponent(props: {
         onClose={() => setOpenModal(false)}
         className="font-poppins"
       >
-        <Modal.Body className="bg-black relative flex justify-center">
+        <Modal.Body className="bg-gradient-to-br rounded-lg from-teal-100 via-teal-300 to-lightGray relative flex justify-center">
           <Carousel
             opts={{
               align: "start",
@@ -99,7 +99,7 @@ export function OverusedDeviceComponent(props: {
             <CarouselPrevious className="bg-transparent border-none text-white hover:bg-transparent hover:text-white" />
             <CarouselNext className="bg-transparent border-none text-white hover:bg-transparent hover:text-white" />
           </Carousel>
-          <h1 className="absolute bottom-5 right-8 text-white text-sm font-light">
+          <h1 className="absolute bottom-5 right-8 text-neutral-900 text-sm font-light">
             <span className="font-bold text-red-500">{props.data.length}</span>{" "}
             out of <span className="font-bold text-tealBright">{props.appliancesLength}</span>{" "}
             exceeded average use.

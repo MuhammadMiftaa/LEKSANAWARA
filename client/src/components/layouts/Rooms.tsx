@@ -13,8 +13,8 @@ import {
   findOverusedDevices,
   processAppliances,
 } from "@/helper/function";
-import { ChartComponent } from "./Chart";
-import { OverusedDeviceComponent } from "./OverusedDevice";
+import { ChartComponent } from "../templates/Chart";
+import { OverusedDeviceComponent } from "../templates/OverusedDevice";
 import { NumberTicker } from "../ui/number-ticker";
 // import * as moment from "moment-duration-format";
 

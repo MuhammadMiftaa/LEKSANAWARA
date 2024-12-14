@@ -1,6 +1,6 @@
 "use client";
 import { BackgroundGradientAnimation } from "../ui/background-gradient-animation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FileUpload } from "@/components/ui/file-upload";
 import {
   Tooltip,
@@ -8,6 +8,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { jwtDecode } from "jwt-decode";
+import { JwtPayload } from "../../types/type";
 
 export default function Upload() {
   const handleLogout = (): void => {
@@ -28,6 +30,7 @@ export default function Upload() {
     try {
       const response = await fetch("http://localhost:8080/v1/upload", {
         method: "POST",
+        credentials: "include",
         body: formData,
       });
 
@@ -41,6 +44,37 @@ export default function Upload() {
       console.error("Error uploading file:", error);
     }
   };
+
+  const [payload, setPayload] = useState<JwtPayload>({
+      email: "",
+      username: "",
+      premium: false,
+    });
+  
+    function decodeJwt(token: string): JwtPayload | null {
+      try {
+        const decoded = jwtDecode(token);
+        return decoded as JwtPayload;
+      } catch (error) {
+        console.error("Invalid JWT token:", error);
+        return null;
+      }
+    }
+  
+    useEffect(() => {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("token="))
+        ?.split("=")[1];
+      if (token) {
+        const payload = decodeJwt(token);
+        if (payload) {
+          setPayload(payload);
+        }
+      }
+    }, []);
+
+
   return (
     <BackgroundGradientAnimation
       gradientBackgroundStart="rgb(30, 60, 90)"
@@ -56,7 +90,7 @@ export default function Upload() {
     >
       <div className="absolute inset-0 flex flex-col items-center justify-evenly text-white font-bold px-4 text-3xl text-center md:text-4xl font-poppins">
         <p className="z-50 py-3 bg-clip-text text-transparent drop-shadow-2xl bg-gradient-to-b from-white/80 to-white/20">
-          Hi, Muhammad Miftakul Salam
+          Hi, {payload?.username}
         </p>
         <div className="w-full max-w-4xl mx-auto bg-transparent rounded-lg font-poppins z-[9999]">
           <FileUpload onChange={handleFileUpload} />

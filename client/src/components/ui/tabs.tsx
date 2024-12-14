@@ -69,6 +69,7 @@ export const Tabs = ({
       // Lakukan fetch ke API
       const response = await fetch("http://localhost:8080/v1/chat", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -91,6 +92,35 @@ export const Tabs = ({
       // Tangani error jika fetch gagal
       console.error("Error fetching chat response:", error);
       setDialog((prev) => [...prev, "Something went wrong. Please try again."]);
+    }
+  }
+
+  async function handleSetPremium() {
+    try {
+      const response = await fetch(
+        "http://localhost:8080/v1/users/set-premium",
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: payload?.email }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.status) {
+        alert("Upgrade to premium success!");
+        document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        window.location.href = "/login";
+      } else {
+        alert("Upgrade to premium failed!");
+      }
+    } catch (error) {
+      console.error("Error fetching chat response:", error);
+      alert("Upgrade to premium failed!");
     }
   }
 
@@ -241,7 +271,13 @@ export const Tabs = ({
                 </div>
                 <h1 className="text-lg">Daily Energy Monitoring</h1>
               </div>
-              <h4 className="w-full h-12 rounded-2xl bg-gradient-to-r from-yellow-300 to-orange-400 mt-8 mb-4 font-inter font-semibold flex justify-center items-center text-black">Uprade to Premium</h4>
+              <button
+                onClick={handleSetPremium}
+                type="button"
+                className="hover:shadow-strong hover:shadow-orange-400 duration-200 cursor-pointer w-full h-12 rounded-2xl bg-gradient-to-r from-yellow-300 to-orange-400 mt-8 mb-4 font-inter font-semibold flex justify-center items-center text-black"
+              >
+                Uprade to Premium
+              </button>
             </Modal.Body>
           </div>
         </div>

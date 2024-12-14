@@ -290,6 +290,40 @@ func (user_handler *usersHandler) DeleteUser(c *gin.Context) {
 	})
 }
 
+func (user_handler *usersHandler) SetPremium(c *gin.Context) {
+	// Ambil Email dari payload body request
+	var userRequest entity.UsersRequest
+	err := c.ShouldBindBodyWithJSON(&userRequest)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"statusCode": 400,
+			"status":     false,
+			"message":    "Invalid request body",
+		})
+		return
+	}
+
+	user, err := user_handler.usersService.SetPremium(userRequest.Email)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"statusCode": 400,
+			"status":     false,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	// MENGUBAH TIPE ENITITY KE TIPE RESPONSE
+	userResponse := helper.ConvertToResponseType(user)
+
+	c.JSON(http.StatusOK, gin.H{
+		"statusCode": 200,
+		"status":     true,
+		"message":    "Update user data",
+		"data":       userResponse,
+	})
+}
+
 func (user_handler *usersHandler) SendOTP(c *gin.Context) {
 	var OTP helper.OTP
 	if err := c.ShouldBindBodyWithJSON(&OTP); err != nil {

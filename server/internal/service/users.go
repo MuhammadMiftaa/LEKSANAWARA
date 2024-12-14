@@ -20,6 +20,7 @@ type UsersService interface {
 	UpdateUser(id string, userNew entity.UsersRequest) (entity.Users, error)
 	VerifyUser(email string) (entity.Users, error)
 	DeleteUser(id string) (entity.Users, error)
+	SetPremium(email string) (entity.Users, error)
 }
 
 type usersService struct {
@@ -179,4 +180,16 @@ func (user_serv *usersService) DeleteUser(id string) (entity.Users, error) {
 	}
 
 	return user_serv.userRepository.DeleteUser(user)
+}
+
+func (user_serv *usersService) SetPremium(email string) (entity.Users, error) {
+	// MENGAMBIL DATA YANG INGIN DI UPDATE
+	user, err := user_serv.userRepository.GetUserByEmail(email)
+	if err != nil {
+		return entity.Users{}, err
+	}
+
+	user.Premium = true
+
+	return user_serv.userRepository.UpdateUser(user)
 }

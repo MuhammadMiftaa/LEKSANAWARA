@@ -70,6 +70,7 @@ export default function Analytics() {
         "http://localhost:8080/v1/generate-monthly-recommendations",
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },

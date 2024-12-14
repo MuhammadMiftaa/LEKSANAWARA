@@ -368,6 +368,7 @@ func ConvertToResponseType(data interface{}) interface{} {
 			ID:    v.ID,
 			Name:  v.Name,
 			Email: v.Email,
+			Premium: v.Premium,
 		}
 	default:
 		return nil

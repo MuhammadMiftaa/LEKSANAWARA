@@ -2,6 +2,7 @@ package routes
 
 import (
 	"smart-home-energy-management-server/interface/http/handler"
+	"smart-home-energy-management-server/interface/http/middleware"
 	"smart-home-energy-management-server/internal/repository"
 	"smart-home-energy-management-server/internal/service"
 
@@ -30,9 +31,10 @@ func UserRoutes(version *gin.RouterGroup, db *gorm.DB, redis *redis.Client) {
 		auth.GET("callback/google", User_handler.CallbackGoogle)
 	}
 
-	// version.Use(middleware.AuthMiddleware())
+	version.Use(middleware.AuthMiddleware())
 	version.GET("users", User_handler.GetAllUsers)
 	version.GET("users/:id", User_handler.GetUserByID)
 	version.PUT("users/:id", User_handler.UpdateUser)
 	version.DELETE("users/:id", User_handler.DeleteUser)
+	version.PUT("users/set-premium", User_handler.SetPremium)
 }

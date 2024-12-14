@@ -137,7 +137,7 @@ export default function Dashboard() {
                       onClick={() => navigate("/upload")}
                       icon={RiUploadCloud2Fill}
                     >
-                      Upload CSV
+                      Change CSV
                     </Dropdown.Item>
                     <Dropdown.Divider />
                     <Dropdown.Item onClick={handleLogout} icon={HiLogout}>

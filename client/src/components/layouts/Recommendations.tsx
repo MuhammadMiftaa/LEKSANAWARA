@@ -26,11 +26,12 @@ export function Recommendations(props: { userEmail: string }) {
       // Inisialisasi targetUsage berdasarkan appliance
       const initialUsage = data.data.map((app: Appliance) => ({
         name: app.name,
-        target: 10, // Set default target usage (contoh: 10 jam)
+        target: app.daily_use_target,
       }));
       setTargetUsage(initialUsage);
     }
   }, [data]);
+  // GET request to fetch table data 🐳
 
   // State untuk target usage per appliance
   const [targetUsage, setTargetUsage] = useState<
@@ -48,16 +49,15 @@ export function Recommendations(props: { userEmail: string }) {
     );
   }
 
-  async function generateRecommendation() {
-    console.log(JSON.stringify({ data: targetUsage, email: props.userEmail }));
-
+  // Fungsi untuk set daily target🐳
+  async function setDailyTarget() {
     const response = await fetch("http://localhost:8080/v1/set-daily-target", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify({ data: targetUsage, email: props.userEmail }), // Ganti userId dengan userId yang sesuai
+      body: JSON.stringify({ data: targetUsage, email: props.userEmail }),
     });
 
     const res = await response.json();
@@ -67,6 +67,56 @@ export function Recommendations(props: { userEmail: string }) {
       console.error(res);
     }
   }
+  // Fungsi untuk set daily target🐳
+
+  // Fungsi untuk generate recommendation🐳
+  async function generateRecommendation() {
+    const response = await fetch(
+      "http://localhost:8080/v1/generate-daily-recommendations",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ golongan: "R-1/TR daya 1300 VA" }),
+      }
+    );
+
+    const res = await response.json();
+    if (res.status) {
+      console.log(res);
+    } else {
+      console.error(res);
+    }
+  }
+  // Fungsi untuk generate recommendation🐳
+
+  // // Fungsi untuk mendapatkan target usage yang sudah ada🐳
+  // async function getExistingTarget() {
+  //   const response = await fetch("http://localhost:8080/v1/get-daily-target", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     credentials: "include",
+  //     body: JSON.stringify({ email: props.userEmail }),
+  //   });
+
+  //   const res = await response.json();
+  //   if (res.status) {
+  //     console.log(res);
+  //     setTargetUsage(res.data);
+  //     setDailyTarget();
+  //   } else {
+  //     console.error(res);
+  //   }
+  // }
+  // // Fungsi untuk mendapatkan target usage yang sudah ada🐳
+
+  // useEffect(() => {
+  //   getExistingTarget();
+  // }, []);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 relative z-10 py-4 max-w-7xl mx-auto">
@@ -162,12 +212,20 @@ export function Recommendations(props: { userEmail: string }) {
           <div></div>
         </div>
       ))}
-      <button
-        onClick={generateRecommendation}
-        className="py-2.5 px-6 rounded-full bg-gradient-to-br hover:bg-gradient-to-br from-teal-300 hover:from-yellow-300 via-lightGray to-tealBright hover:to-orange-400 fixed shadow-strong shadow-white uppercase text-lg tracking-[.2rem] font-bold font-inter hover:shadow-orange-400 duration-500 cursor-pointer bottom-10 left-1/2 -translate-x-1/2"
-      >
-        Generate Now
-      </button>
+      <div className="fixed bottom-10 left-1/2 -translate-x-1/2">
+        <button
+          onClick={setDailyTarget}
+          className="mr-6 py-2.5 px-6 rounded-full bg-gradient-to-br hover:bg-gradient-to-br from-teal-300 hover:from-yellow-300 via-lightGray to-tealBright hover:to-orange-400 shadow-strong shadow-white uppercase text-lg tracking-[.2rem] font-bold font-inter hover:shadow-orange-400 duration-500 cursor-pointer"
+        >
+          Save
+        </button>
+        <button
+          onClick={generateRecommendation}
+          className="py-2.5 px-6 rounded-full bg-gradient-to-br hover:bg-gradient-to-br from-teal-300 hover:from-yellow-300 via-lightGray to-tealBright hover:to-orange-400 shadow-strong shadow-white uppercase text-lg tracking-[.2rem] font-bold font-inter hover:shadow-orange-400 duration-500 cursor-pointer"
+        >
+          Generate Now
+        </button>
+      </div>
     </div>
   );
 }

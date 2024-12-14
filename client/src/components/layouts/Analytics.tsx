@@ -191,7 +191,6 @@ export default function Analytics() {
 function ResultComponent(props: { data: Recommendations }) {
   // const { message } = props.data;
   const cards = mapStringsToObjects(props.data.recommendations);
-  console.log(cards);
   const [active, setActive] = useState<(typeof cards)[number] | boolean | null>(
     null
   );

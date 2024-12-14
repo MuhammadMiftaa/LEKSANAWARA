@@ -646,10 +646,20 @@ func (h *fileHandler) GetDailyTarget(c *gin.Context) {
 		return
 	}
 
+	var dailyTargetJSON []helper.DailyTarget
+	if err = json.Unmarshal([]byte(dailyTarget), &dailyTargetJSON); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"statusCode": 500,
+			"status":     false,
+			"message":    "Failed to unmarshal daily target",
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":     true,
 		"statusCode": 200,
 		"message":    "Get daily target success",
-		"data":       dailyTarget,
+		"data":       dailyTargetJSON,
 	})
 }

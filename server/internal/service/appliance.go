@@ -17,6 +17,7 @@ type ApplianceService interface {
 	TruncateAppliances() error
 	SetDailyTarget([]helper.DailyTarget) ([]entity.Appliance, error)
 	SaveDailyTarget(data, email string) error
+	GetDailyTarget(email string) (string, error)
 }
 
 type applianceService struct {
@@ -110,4 +111,8 @@ func (s *applianceService) SetDailyTarget(dailyTargets []helper.DailyTarget) ([]
 
 func (s *applianceService) SaveDailyTarget(data, email string) error {
 	return s.RedisRepository.Save("daily-target-"+email, data)
+}
+
+func (s *applianceService) GetDailyTarget(email string) (string, error) {
+	return s.RedisRepository.Get("daily-target-" + email)
 }

@@ -621,3 +621,35 @@ func (h *fileHandler) SetDailyTarget(c *gin.Context) {
 		"appliances": appliances,
 	})
 }
+
+func (h *fileHandler) GetDailyTarget(c *gin.Context) {
+	var Payload struct {
+		Email string `json:"email"`
+	}
+
+	if err := c.ShouldBindJSON(&Payload); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"statusCode": 400,
+			"status":     false,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	dailyTarget, err := h.applianceService.GetDailyTarget(Payload.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"statusCode": 500,
+			"status":     false,
+			"message":    "Failed to get daily target",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":     true,
+		"statusCode": 200,
+		"message":    "Get daily target success",
+		"data":       dailyTarget,
+	})
+}

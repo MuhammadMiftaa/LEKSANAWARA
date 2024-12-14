@@ -29,6 +29,7 @@ func FileRoutes(version *gin.RouterGroup, psql *gorm.DB, redis *redis.Client) {
 	version.GET("/appliance", fileHandler.GetAppliance)
 	version.GET("/all-appliances", fileHandler.GetAllAppliance)
 	version.PUT("/set-daily-target", fileHandler.SetDailyTarget)
+	version.GET("/get-daily-target", fileHandler.GetDailyTarget)
 	version.POST("/generate-daily-recommendations", fileHandler.GenerateDailyRecommendations)
 	version.POST("/generate-monthly-recommendations", fileHandler.GenerateMonthlyRecommendations)
 }

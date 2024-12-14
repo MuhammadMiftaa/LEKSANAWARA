@@ -400,3 +400,4 @@ func (user_handler *usersHandler) VerifyOTP(c *gin.Context) {
 		"data":       userResponse,
 	})
 }
+

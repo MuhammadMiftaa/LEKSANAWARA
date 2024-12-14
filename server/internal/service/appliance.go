@@ -1,7 +1,10 @@
 package service
 
 import (
+	"sync"
+
 	"smart-home-energy-management-server/internal/entity"
+	"smart-home-energy-management-server/internal/helper"
 	"smart-home-energy-management-server/internal/repository"
 )
 
@@ -12,14 +15,17 @@ type ApplianceService interface {
 	UpdateApplianceByID(id uint, appliance *entity.Appliance) (*entity.Appliance, error)
 	DeleteApplianceByID(id uint) error
 	TruncateAppliances() error
+	SetDailyTarget([]helper.DailyTarget) ([]entity.Appliance, error)
+	SaveDailyTarget(data, email string) error
 }
 
 type applianceService struct {
-	applianceRepo repository.ApplianceRepository
+	applianceRepo   repository.ApplianceRepository
+	RedisRepository repository.RedisRepository
 }
 
-func NewApplianceService(applianceRepo repository.ApplianceRepository) ApplianceService {
-	return &applianceService{applianceRepo: applianceRepo}
+func NewApplianceService(applianceRepo repository.ApplianceRepository, redisRepository repository.RedisRepository) ApplianceService {
+	return &applianceService{applianceRepo: applianceRepo, RedisRepository: redisRepository}
 }
 
 func (s *applianceService) CreateAppliance(applianceReq *entity.ApplianceRequest) (*entity.Appliance, error) {
@@ -81,4 +87,27 @@ func (s *applianceService) DeleteApplianceByID(id uint) error {
 
 func (s *applianceService) TruncateAppliances() error {
 	return s.applianceRepo.Truncate()
+}
+
+func (s *applianceService) SetDailyTarget(dailyTargets []helper.DailyTarget) ([]entity.Appliance, error) {
+	// Update daily use target for each appliance use Goroutine
+	wg := sync.WaitGroup{}
+	for _, dailyTarget := range dailyTargets {
+		wg.Add(1)
+		go func(dailyTarget helper.DailyTarget) {
+			defer wg.Done()
+			appliance, err := s.applianceRepo.FindByName(dailyTarget.Name)
+			if err != nil {
+				return
+			}
+			appliance.DailyUseTarget = float64(dailyTarget.Target)
+			_, _ = s.applianceRepo.UpdateByID(appliance.ID, appliance)
+		}(dailyTarget)
+	}
+	wg.Wait()
+	return s.applianceRepo.FindAll()
+}
+
+func (s *applianceService) SaveDailyTarget(data, email string) error {
+	return s.RedisRepository.Save("daily-target-"+email, data)
 }

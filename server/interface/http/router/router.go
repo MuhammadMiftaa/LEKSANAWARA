@@ -2,7 +2,7 @@ package router
 
 import (
 	"smart-home-energy-management-server/interface/http/middleware"
-	"smart-home-energy-management-server/interface/http/routes"
+	"smart-home-energy-management-server/interface/http/app"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"

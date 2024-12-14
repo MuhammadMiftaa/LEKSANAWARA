@@ -13,11 +13,12 @@ import (
 func FileRoutes(version *gin.RouterGroup, psql *gorm.DB, redis *redis.Client) {
 
 	redisRepository := repository.NewRedisRepository(redis)
+
 	fileService := service.NewFileService(redisRepository)
 	recommendationService := service.NewRecommendationService(redisRepository)
 
 	applianceRepository := repository.NewApplianceRepository(psql)
-	applianceService := service.NewApplianceService(applianceRepository)
+	applianceService := service.NewApplianceService(applianceRepository, redisRepository)
 
 	fileHandler := handler.NewFileHandler(applianceService, fileService, recommendationService)
 
@@ -27,6 +28,7 @@ func FileRoutes(version *gin.RouterGroup, psql *gorm.DB, redis *redis.Client) {
 	version.POST("/tapas-chat", fileHandler.TapasChat)
 	version.GET("/appliance", fileHandler.GetAppliance)
 	version.GET("/all-appliances", fileHandler.GetAllAppliance)
+	version.PUT("/set-daily-target", fileHandler.SetDailyTarget)
 	version.POST("/generate-daily-recommendations", fileHandler.GenerateDailyRecommendations)
 	version.POST("/generate-monthly-recommendations", fileHandler.GenerateMonthlyRecommendations)
 }

@@ -36,24 +36,6 @@ export default function Dashboard() {
 
   const [openHeader, setOpenHeader] = useState<boolean>(true);
 
-  const tabs = [
-    {
-      title: "Rooms",
-      value: "rooms",
-      content: <RoomsTabs />,
-    },
-    {
-      title: "Analytics",
-      value: "analytics",
-      content: <Analytics />,
-    },
-    {
-      title: "Recommendations",
-      value: "recommendations",
-      content: <Recommendations />,
-    },
-  ];
-
   // const [JWTSecret, setJWTSecret] = useState<string>(getJWTSecret());
   const [payload, setPayload] = useState<JwtPayload>({
     email: "",
@@ -88,6 +70,24 @@ export default function Dashboard() {
     document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     window.location.href = "/login";
   };
+
+  const tabs = [
+    {
+      title: "Rooms",
+      value: "rooms",
+      content: <RoomsTabs />,
+    },
+    {
+      title: "Analytics",
+      value: "analytics",
+      content: <Analytics />,
+    },
+    {
+      title: "Recommendations",
+      value: "recommendations",
+      content: <Recommendations userEmail={payload?.email} />,
+    },
+  ];
 
   return (
     <div className="bg-lightGray absolute inset-0 p-4 font-poppins flex flex-col gap-4">
@@ -162,7 +162,9 @@ export default function Dashboard() {
               ) : (
                 <h1
                   className={`uppercase font-bold px-3 py-1 rounded-xl bg-gradient-to-br from-yellow-300 via-yellow-100 mr-2 to-yellow-300 text-lg ${
-                    !openHeader ? "delay-1000 tracking-[-1rem]" : " tracking-wide"
+                    !openHeader
+                      ? "delay-1000 tracking-[-1rem]"
+                      : " tracking-wide"
                   }`}
                 >
                   Premium

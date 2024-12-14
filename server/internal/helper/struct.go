@@ -43,6 +43,11 @@ type UsageMetadata struct {
 }
 
 type OTP struct {
-	Email    string `json:"email"`
-	OTP      string `json:"otp"`
+	Email string `json:"email"`
+	OTP   string `json:"otp"`
+}
+
+type DailyTarget struct {
+	Name   string `json:"name"`
+	Target int    `json:"target"`
 }

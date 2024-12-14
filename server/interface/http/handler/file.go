@@ -449,7 +449,7 @@ func (h *fileHandler) GetAllAppliance(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status": true,
+		"status":     true,
 		"statusCode": 200,
 		"message":    "Get all appliances success",
 		"data":       result,
@@ -561,5 +561,63 @@ func (h *fileHandler) GenerateDailyRecommendations(c *gin.Context) {
 			AnalysisResult: analysisResult,
 			Recommendation: recommendation,
 		},
+	})
+}
+
+func (h *fileHandler) SetDailyTarget(c *gin.Context) {
+	var dailyTarget struct {
+		Data  []helper.DailyTarget `json:"data"`
+		Email string               `json:"email"`
+	}
+
+	if err := c.ShouldBindJSON(&dailyTarget); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"statusCode": 400,
+			"status":     false,
+			"data":       dailyTarget.Data,
+			"message":    err.Error(),
+		})
+		return
+	}
+
+	appliances, err := h.applianceService.SetDailyTarget(dailyTarget.Data)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"statusCode": 500,
+			"status":     false,
+			"data":       dailyTarget.Data,
+			"message":    "Failed to set daily target",
+		})
+		return
+	}
+
+	dailyTargetJSON, err := json.Marshal(dailyTarget.Data)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"statusCode": 500,
+			"status":     false,
+			"data":       dailyTarget.Data,
+			"message":    "Failed to marshal daily target",
+		})
+		return
+	}
+
+	err = h.applianceService.SaveDailyTarget(string(dailyTargetJSON), dailyTarget.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"statusCode": 500,
+			"status":     false,
+			"data":       dailyTarget.Data,
+			"message":    "Failed to save daily target",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":     true,
+		"statusCode": 200,
+		"message":    "Daily target set successfully",
+		"data":       dailyTarget.Data,
+		"appliances": appliances,
 	})
 }

@@ -5,7 +5,7 @@ import useSWR from "swr";
 import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function Recommendations() {
+export function Recommendations(props: { userEmail: string }) {
   // GET request to fetch table data 🐳
   const [appliance, setAppliance] = useState<Appliance[]>([]);
   const applianceFetcher = (url: string, init: RequestInit | undefined) =>
@@ -25,8 +25,8 @@ export function Recommendations() {
       setAppliance(data.data);
       // Inisialisasi targetUsage berdasarkan appliance
       const initialUsage = data.data.map((app: Appliance) => ({
-        id: app.id,
-        target: 0, // Set default target usage (contoh: 10 jam)
+        name: app.name,
+        target: 10, // Set default target usage (contoh: 10 jam)
       }));
       setTargetUsage(initialUsage);
     }
@@ -34,18 +34,38 @@ export function Recommendations() {
 
   // State untuk target usage per appliance
   const [targetUsage, setTargetUsage] = useState<
-    { id: number, target: number }[]
+    { name: string; target: number }[]
   >([]);
 
   // Fungsi untuk mengubah target usage berdasarkan appliance name
-  function updateTargetUsage(id: number, adjustment: number) {
+  function updateTargetUsage(name: string, adjustment: number) {
     setTargetUsage((prev) =>
       prev.map((item) =>
-        item.id === id
+        item.name === name
           ? { ...item, target: Math.max(0, item.target + adjustment) } // Minimal 0
           : item
       )
     );
+  }
+
+  async function generateRecommendation() {
+    console.log(JSON.stringify({ data: targetUsage, email: props.userEmail }));
+
+    const response = await fetch("http://localhost:8080/v1/set-daily-target", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ data: targetUsage, email: props.userEmail }), // Ganti userId dengan userId yang sesuai
+    });
+
+    const res = await response.json();
+    if (res.status) {
+      console.log(res);
+    } else {
+      console.error(res);
+    }
   }
 
   return (
@@ -91,9 +111,9 @@ export function Recommendations() {
                 variant="outline"
                 size="icon"
                 className="h-6 w-6 shrink-0 rounded-full"
-                onClick={() => updateTargetUsage(app.id, -1)} // Kurangi target usage
+                onClick={() => updateTargetUsage(app.name, -1)} // Kurangi target usage
                 disabled={
-                  targetUsage.find((item) => item.id === app.id)?.target ===
+                  targetUsage.find((item) => item.name === app.name)?.target ===
                   0
                 }
               >
@@ -102,10 +122,10 @@ export function Recommendations() {
               </Button>
               <div className="flex-1 text-center">
                 <input
-                  name={`target-${app.id}`}
+                  name={`target-${app.name}`}
                   type="number"
                   value={
-                    targetUsage.find((item) => item.id === app.id)
+                    targetUsage.find((item) => item.name === app.name)
                       ?.target || 0
                   }
                   onChange={(e) => {
@@ -115,7 +135,7 @@ export function Recommendations() {
                     ); // Minimal 0
                     setTargetUsage((prev) =>
                       prev.map((item) =>
-                        item.id === app.id
+                        item.name === app.name
                           ? { ...item, target: newTarget }
                           : item
                       )
@@ -132,7 +152,7 @@ export function Recommendations() {
                 variant="outline"
                 size="icon"
                 className="h-6 w-6 shrink-0 rounded-full"
-                onClick={() => updateTargetUsage(app.id, 1)} // Tambah target usage
+                onClick={() => updateTargetUsage(app.name, 1)} // Tambah target usage
               >
                 <Plus />
                 <span className="sr-only">Increase</span>
@@ -142,7 +162,10 @@ export function Recommendations() {
           <div></div>
         </div>
       ))}
-      <button type="button" onClick={() => console.log(targetUsage)} className="py-2.5 px-6 rounded-full bg-gradient-to-br hover:bg-gradient-to-br from-teal-300 hover:from-yellow-300 via-lightGray to-tealBright hover:to-orange-400 fixed shadow-strong shadow-white uppercase text-lg tracking-[.2rem] font-bold font-inter hover:shadow-orange-400 duration-500 cursor-pointer bottom-10 left-1/2 -translate-x-1/2">
+      <button
+        onClick={generateRecommendation}
+        className="py-2.5 px-6 rounded-full bg-gradient-to-br hover:bg-gradient-to-br from-teal-300 hover:from-yellow-300 via-lightGray to-tealBright hover:to-orange-400 fixed shadow-strong shadow-white uppercase text-lg tracking-[.2rem] font-bold font-inter hover:shadow-orange-400 duration-500 cursor-pointer bottom-10 left-1/2 -translate-x-1/2"
+      >
         Generate Now
       </button>
     </div>

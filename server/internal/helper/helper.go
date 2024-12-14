@@ -293,10 +293,12 @@ func PrintRecommendationsDailyUsage(appliances []entity.ApplianceResponse, tarif
 		var applianceSummary DailySummary
 		if appliance.UsageToday > appliance.DailyUseTarget {
 			applianceSummary.ApplianceName = appliance.Name
+			applianceSummary.Type = appliance.Type
 			applianceSummary.Message = fmt.Sprintf("WARNING: %s telah melebihi target harian!", appliance.Name)
 			applianceSummary.IsOveruse = true
 		} else {
 			applianceSummary.ApplianceName = appliance.Name
+			applianceSummary.Type = appliance.Type
 			applianceSummary.Message = fmt.Sprintf("%s dalam batas target harian. (Penggunaan: %.2f jam, Target: %.2f jam)", appliance.Name, appliance.UsageToday, appliance.DailyUseTarget)
 			applianceSummary.IsOveruse = false
 		}

@@ -51,4 +51,24 @@ export type JwtPayload = {
   email: string;
   username: string;
   premium: boolean;
-}
+};
+
+export type AnalysisResult = {
+  ApplianceName: string;
+  Type: string;
+  Message: string;
+  Info: string;
+  IsOveruse: boolean;
+  Usage: number;
+  Target: number;
+};
+
+export type Recommendation = {
+  Name: string;
+  Message: string[];
+};
+
+export type ResponseType = {
+  "analysis-result": AnalysisResult[];
+  recommendation: Recommendation[];
+};

@@ -2,6 +2,7 @@ package helper
 
 type DailySummary struct {
 	ApplianceName string
+	Type          string
 	Message       string
 	Info          string
 	IsOveruse     bool

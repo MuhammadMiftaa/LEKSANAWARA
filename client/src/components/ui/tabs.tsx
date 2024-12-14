@@ -5,9 +5,10 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { BiSolidBot } from "react-icons/bi";
-import { Drawer } from "flowbite-react";
+import { Drawer, Modal } from "flowbite-react";
 import ChatComponent from "./chat-form";
 import { JwtPayload } from "@/types/type";
+import { FaCheck } from "react-icons/fa6";
 
 type Tab = {
   title: string;
@@ -37,6 +38,8 @@ export const Tabs = ({
 
   const [isOpen, setIsOpen] = useState(false);
   const handleClose = () => setIsOpen(false);
+
+  const [openModal, setOpenModal] = useState(false);
 
   const moveSelectedTabToTop = (idx: number) => {
     const newTabs = [...propTabs];
@@ -99,7 +102,13 @@ export const Tabs = ({
           containerClassName
         )}
       >
-        <h1 className={`absolute ${openHeader ? "left-10 delay-500" : "left-32"} duration-500 text-xl uppercase tracking-[.5rem] font-inter`}>Leksanawara.</h1>
+        <h1
+          className={`absolute ${
+            openHeader ? "left-10 delay-500" : "left-32"
+          } duration-500 text-xl uppercase tracking-[.5rem] font-inter`}
+        >
+          Leksanawara.
+        </h1>
         {propTabs.map((tab, idx) => (
           <button
             key={tab.title}
@@ -142,7 +151,10 @@ export const Tabs = ({
               </div>
             </button>
           ) : (
-            <button className="inline-flex h-10 mr-4 animate-shimmer items-center justify-center rounded-xl border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
+            <button
+              onClick={() => setOpenModal(true)}
+              className="inline-flex h-10 mr-4 animate-shimmer items-center justify-center rounded-xl border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
+            >
               Unlock Premium
             </button>
           )}
@@ -190,6 +202,50 @@ export const Tabs = ({
           <ChatComponent handleChat={addChat} />
         </Drawer.Items>
       </Drawer>
+      <Modal
+        size="lg"
+        className=""
+        dismissible
+        show={openModal}
+        onClose={() => setOpenModal(false)}
+      >
+        <div className="p-0.5 bg-gradient-to-b from-yellow-300 to-orange-400 rounded-lg">
+          <div className="bg-zinc-950 rounded-md px-5">
+            <Modal.Body>
+              <h2 className="px-2 py-1 rounded-full uppercase font-inter border border-orange-400 bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 to-orange-500 absolute w-fit top-6 right-6 text-xs font-bold tracking-wider">
+                Best Offer
+              </h2>
+              <div className="bg-gradient-to-b from-yellow-300 to-orange-400 p-0.5 w-fit rounded-full mt-10">
+                <img
+                  className="p-1.5 bg-black h-20 w-20 rounded-full"
+                  src="/logo.webp"
+                  alt=""
+                />
+              </div>
+              <h1 className="font-inter bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 to-orange-500 text-3xl relative py-5">
+                Premium
+              </h1>
+              <div className="h-0.5 w-16 bg-gradient-to-r from-yellow-300 to-orange-400 "></div>
+              <h3 className="font-bold font-inter text-5xl text-white mt-4">
+                IDR 9.900
+                <span className="text-sm font-medium text-zinc-300">
+                  /month
+                </span>
+              </h3>
+              <p className="font-inter mt-4 text-zinc-600 text-xs font-light">
+                Track your appliance energy usage every day and stay in control.
+              </p>
+              <div className="flex text-white gap-2 mt-4 items-center">
+                <div className="border-[1.5px] border-orange-400 rounded-full text-white text-sm w-fit p-1">
+                  <FaCheck />
+                </div>
+                <h1 className="text-lg">Daily Energy Monitoring</h1>
+              </div>
+              <h4 className="w-full h-12 rounded-2xl bg-gradient-to-r from-yellow-300 to-orange-400 mt-8 mb-4 font-inter font-semibold flex justify-center items-center text-black">Uprade to Premium</h4>
+            </Modal.Body>
+          </div>
+        </div>
+      </Modal>
       <FadeInDiv
         tabs={tabs}
         active={active}

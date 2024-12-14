@@ -10,6 +10,7 @@ import { JwtPayload } from "../../types/type";
 import { Dropdown } from "flowbite-react";
 import { HiLogout } from "react-icons/hi";
 import { RiUploadCloud2Fill } from "react-icons/ri";
+import { Recommendations } from "./Recommendations";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -49,12 +50,7 @@ export default function Dashboard() {
     {
       title: "Recommendations",
       value: "recommendations",
-      content: (
-        <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-white bg-transparent">
-          <p>Recommendations tab</p>
-          <DummyContent />
-        </div>
-      ),
+      content: <Recommendations />,
     },
   ];
 
@@ -164,7 +160,11 @@ export default function Dashboard() {
                   </h2>
                 </>
               ) : (
-                <h1 className="uppercase font-bold px-3 py-1 rounded-xl bg-gradient-to-br from-yellow-300 via-yellow-100 tracking-wide mr-2 to-yellow-300 text-lg">
+                <h1
+                  className={`uppercase font-bold px-3 py-1 rounded-xl bg-gradient-to-br from-yellow-300 via-yellow-100 mr-2 to-yellow-300 text-lg ${
+                    !openHeader ? "delay-1000 tracking-[-1rem]" : " tracking-wide"
+                  }`}
+                >
                   Premium
                 </h1>
               )}
@@ -222,15 +222,3 @@ function GoToUpload() {
     </>
   );
 }
-
-const DummyContent = () => {
-  return (
-    <img
-      src="/linear.webp"
-      alt="dummy image"
-      width="1000"
-      height="1000"
-      className="object-cover object-left-top h-[60%]  md:h-[90%] absolute -bottom-10 inset-x-0 w-[90%] rounded-xl mx-auto"
-    />
-  );
-};

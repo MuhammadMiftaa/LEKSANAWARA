@@ -1,14 +1,19 @@
 import { useEffect, useState } from "react";
 import { IoIosCloseCircleOutline } from "react-icons/io";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useSWR from "swr";
 import { Tabs } from "../ui/tabs";
 import RoomsTabs from "../templates/Rooms";
 import Analytics from "./Analytics";
 import { jwtDecode } from "jwt-decode";
 import { JwtPayload } from "../../types/type";
+import { Dropdown } from "flowbite-react";
+import { HiLogout } from "react-icons/hi";
+import { RiUploadCloud2Fill } from "react-icons/ri";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+
   // GET request to fetch table data🐳
   const [table, setTable] = useState<string>("");
   const fetcher = (url: string, init: RequestInit | undefined) =>
@@ -83,6 +88,11 @@ export default function Dashboard() {
     }
   }, []);
 
+  const handleLogout = (): void => {
+    document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    window.location.href = "/login";
+  };
+
   return (
     <div className="bg-lightGray absolute inset-0 p-4 font-poppins flex flex-col gap-4">
       <div
@@ -109,11 +119,32 @@ export default function Dashboard() {
                 !openHeader ? "opacity-0" : "delay-1000"
               } ease-ease-in-out-smooth duration-500 flex gap-4`}
             >
-              <div className="flex items-center gap-2">
-                <h2 className="font-light text-2xl text-zinc-800">
-                  Welcome in,
-                </h2>
-                <h1 className="font-semibold text-2xl">{payload?.username}</h1>
+              <div className="flex items-center gap-2 text-2xl">
+                <h2 className="font-light  text-zinc-800">Welcome in,</h2>
+                <h1 className="font-semibold text-2xl">
+                  <Dropdown
+                    inline
+                    className="font-semibold text-5xl bg-gradient-to-br from-teal-300 via-lightGray to-teal-100"
+                    label={payload?.username}
+                  >
+                    <Dropdown.Header>
+                      <span className="block text-sm">{payload?.username}</span>
+                      <span className="block truncate text-sm font-light">
+                        {payload?.email}
+                      </span>
+                    </Dropdown.Header>
+                    <Dropdown.Item
+                      onClick={() => navigate("/upload")}
+                      icon={RiUploadCloud2Fill}
+                    >
+                      Upload CSV
+                    </Dropdown.Item>
+                    <Dropdown.Divider />
+                    <Dropdown.Item onClick={handleLogout} icon={HiLogout}>
+                      Sign out
+                    </Dropdown.Item>
+                  </Dropdown>
+                </h1>
               </div>
             </div>
           </div>
@@ -133,7 +164,9 @@ export default function Dashboard() {
                   </h2>
                 </>
               ) : (
-                <h1 className="uppercase font-bold px-3 py-1 rounded-xl bg-gradient-to-br from-yellow-300 via-yellow-100 tracking-wide mr-2 to-yellow-300 text-lg">Premium</h1>
+                <h1 className="uppercase font-bold px-3 py-1 rounded-xl bg-gradient-to-br from-yellow-300 via-yellow-100 tracking-wide mr-2 to-yellow-300 text-lg">
+                  Premium
+                </h1>
               )}
             </div>
             <div
@@ -146,7 +179,7 @@ export default function Dashboard() {
             </div>
           </div>
           {/* <h1 className="font-inter italic absolute left-1/2 -translate-x-[50%] bg-clip-text text-transparent bg-gradient-to-r from-zinc-600 to-zinc-800 text-lg">
-          PowerSync
+          Leksanawara
         </h1> */}
         </div>
       </div>
@@ -158,7 +191,7 @@ export default function Dashboard() {
         {table ? (
           <div className="h-full w-full relative b flex flex-col items-start justify-start">
             <Tabs
-            payload={payload}
+              payload={payload}
               tabs={tabs}
               containerClassName={`${!openHeader ? "h-28" : "h-16"}`}
               openHeader={openHeader}

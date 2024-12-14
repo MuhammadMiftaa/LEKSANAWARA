@@ -99,6 +99,7 @@ export const Tabs = ({
           containerClassName
         )}
       >
+        <h1 className={`absolute ${openHeader ? "left-10 delay-500" : "left-32"} duration-500 text-xl uppercase tracking-[.5rem] font-inter`}>Leksanawara.</h1>
         {propTabs.map((tab, idx) => (
           <button
             key={tab.title}

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { BackgroundGradientAnimation } from "../ui/background-gradient-animation";
 import { useState } from "react";
 import { FileUpload } from "@/components/ui/file-upload";
@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/tooltip";
 
 export default function Upload() {
-
   const handleLogout = (): void => {
     document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     window.location.href = "/login";
@@ -37,7 +36,7 @@ export default function Upload() {
       }
 
       const data = await response.json();
-      console.log("Upload successful:", {files, data});
+      console.log("Upload successful:", { files, data });
     } catch (error) {
       console.error("Error uploading file:", error);
     }
@@ -65,12 +64,17 @@ export default function Upload() {
         <div className="w-64 h-10 rounded-full bg-white flex items-center justify-center gap-3">
           <img src="/logo.webp" alt="logo" className="w-8 h-8 rounded" />
           <h1 className="font-poppins text-xl italic font-semibold text-transparent bg-clip-text bg-gradient-to-l from-black to-neutral-400 w-fit">
-            PowerSync
+            Leksanawara
           </h1>
         </div>
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger onClick={handleLogout} className="z-50 font-light uppercase absolute bottom-2 right-4 text-base text-zinc-200 hover:underline">Logout</TooltipTrigger>
+            <TooltipTrigger
+              onClick={handleLogout}
+              className="z-50 font-light uppercase absolute bottom-2 right-4 text-base text-zinc-200 hover:underline"
+            >
+              Logout
+            </TooltipTrigger>
             <TooltipContent>
               <p>Log out of your account securely</p>
             </TooltipContent>

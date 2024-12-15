@@ -36,7 +36,6 @@ export default function Dashboard() {
 
   const [openHeader, setOpenHeader] = useState<boolean>(true);
 
-  // const [JWTSecret, setJWTSecret] = useState<string>(getJWTSecret());
   const [payload, setPayload] = useState<JwtPayload>({
     email: "",
     username: "",
@@ -80,7 +79,7 @@ export default function Dashboard() {
     {
       title: "Analyze",
       value: "analyze",
-      content: <Analyze userEmail={payload?.email} />,
+      content: <Analyze />,
     },
     {
       title: "Schedule",

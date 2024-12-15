@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { Appliance, ResponseType } from "@/types/type";
+import { Appliance, JwtPayload, ResponseType } from "@/types/type";
 import { useEffect, useId, useRef, useState } from "react";
 import useSWR from "swr";
 import { Minus, Plus } from "lucide-react";
@@ -11,8 +11,39 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import { IoIosWarning } from "react-icons/io";
 import { IoCheckmarkDoneCircle } from "react-icons/io5";
 import { FcElectroDevices } from "react-icons/fc";
+import { jwtDecode } from "jwt-decode";
+import NotPremium from "../templates/NotPremium";
 
-export default function Analyze(props: { userEmail: string }) {
+export default function Analyze() {
+  const [payload, setPayload] = useState<JwtPayload>({
+    email: "",
+    username: "",
+    premium: false,
+  });
+
+  function decodeJwt(token: string): JwtPayload | null {
+    try {
+      const decoded = jwtDecode(token);
+      return decoded as JwtPayload;
+    } catch (error) {
+      console.error("Invalid JWT token:", error);
+      return null;
+    }
+  }
+
+  useEffect(() => {
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("token="))
+      ?.split("=")[1];
+    if (token) {
+      const payload = decodeJwt(token);
+      if (payload) {
+        setPayload(payload);
+      }
+    }
+  }, []);
+
   // GET request to fetch table data 🐳
   const [appliance, setAppliance] = useState<Appliance[]>([]);
   const applianceFetcher = (url: string, init: RequestInit | undefined) =>
@@ -65,7 +96,7 @@ export default function Analyze(props: { userEmail: string }) {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify({ data: targetUsage, email: props.userEmail }),
+      body: JSON.stringify({ data: targetUsage, email: payload.email }),
     });
 
     const res = await response.json();
@@ -130,132 +161,141 @@ export default function Analyze(props: { userEmail: string }) {
   //   getExistingTarget();
   // }, []);
 
-  return recommendation ? (
-    <AnalyzeResult data={recommendation} />
-  ) : (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 relative z-10 py-4 max-w-7xl mx-auto">
-      {appliance.map((app, index) => (
-        <div
-          key={app.name}
-          className={cn(
-            "flex flex-col lg:border-r  pt-10 relative group/feature dark:border-neutral-800",
-            (index === 0 || index === 4) &&
-              "lg:border-l dark:border-neutral-800",
-            index < 4 && "lg:border-b dark:border-neutral-800"
-          )}
-        >
-          {index < 4 && (
-            <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-t from-neutral-100 dark:from-neutral-800 to-transparent pointer-events-none" />
-          )}
-          {index >= 4 && (
-            <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-b from-neutral-100 dark:from-neutral-800 to-transparent pointer-events-none" />
-          )}
-          <div className="mb-4 relative z-10 px-10 text-neutral-600 dark:text-neutral-400">
-            <img
-              className="h-12 w-12 object-contain"
-              src={`/appliance/${app.type}.png`}
-              alt=""
-            />
-          </div>
-          <div className="text-lg font-bold mb-2 relative z-10 px-10">
-            <div className="absolute left-0 inset-y-0 h-6 group-hover/feature:h-8 w-1 rounded-tr-full rounded-br-full bg-neutral-300 dark:bg-neutral-700 group-hover/feature:bg-blue-500 transition-all duration-200 origin-center" />
-            <div className="flex w-full flex-col">
-              <div className="flex flex-col">
-                <span className="group-hover/feature:translate-x-2 transition duration-200 text-base inline-block text-black dark:text-neutral-100">
-                  {app.location}
-                </span>
-              </div>
-              <h1 className="font-light -mt-1.5 text-nowrap overflow-scroll">
-                {app.name} - {app.power} Watt
-              </h1>
-            </div>
-            <div className="flex items-center justify-center space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="h-6 w-6 shrink-0 rounded-full"
-                onClick={() => updateTargetUsage(app.name, -1)} // Kurangi target usage
-                disabled={
-                  targetUsage.find((item) => item.name === app.name)?.target ===
-                  0
-                }
-              >
-                <Minus />
-                <span className="sr-only">Decrease</span>
-              </Button>
-              <div className="flex-1 text-center">
-                <input
-                  name={`target-${app.name}`}
-                  type="number"
-                  value={
-                    targetUsage.find((item) => item.name === app.name)
-                      ?.target || 0
-                  }
-                  onChange={(e) => {
-                    const newTarget = Math.max(
-                      0,
-                      parseInt(e.target.value) || 0
-                    ); // Minimal 0
-                    setTargetUsage((prev) =>
-                      prev.map((item) =>
-                        item.name === app.name
-                          ? { ...item, target: newTarget }
-                          : item
-                      )
-                    );
-                  }}
-                  className="w-full text-2xl font-bold tracking-tighter bg-transparent border-none focus:outline-none text-center"
+  return payload.premium ? (
+    recommendation ? (
+      <AnalyzeResult data={recommendation} />
+    ) : (
+      <div className="relative z-10">
+        <h1 className="text-sm font-bold font-poppins z-50 sticky left-1/2 -translate-x-1/2 top-2 shadow-medium shadow-lightGray ml-4 mb-3 text-black bg-gradient-to-br from-lightGray via-lightGray to-teal-300 py-2 px-5 rounded-xl w-fit">
+          Set Daily Target Appliance
+        </h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 relative z-10 py-4 max-w-7xl mx-auto">
+          {appliance.map((app, index) => (
+            <div
+              key={app.name}
+              className={cn(
+                "flex flex-col lg:border-r  pt-10 relative group/feature dark:border-neutral-800",
+                (index === 0 || index === 4) &&
+                  "lg:border-l dark:border-neutral-800",
+                index < 4 && "lg:border-b dark:border-neutral-800"
+              )}
+            >
+              {index < 4 && (
+                <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-t from-neutral-100 dark:from-neutral-800 to-transparent" />
+              )}
+              {index >= 4 && (
+                <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-b from-neutral-100 dark:from-neutral-800 to-transparent" />
+              )}
+              <div className="mb-4 relative z-10 px-10 text-neutral-600 dark:text-neutral-400">
+                <img
+                  className="h-12 w-12 object-contain"
+                  src={`/appliance/${app.type}.png`}
+                  alt=""
                 />
-                <div className="text-[0.60rem] font-medium uppercase text-muted-foreground -mt-5">
-                  Hours/Day
+              </div>
+              <div className="text-lg font-bold mb-2 relative z-10 px-10">
+                <div className="absolute left-0 inset-y-0 h-6 group-hover/feature:h-8 w-1 rounded-tr-full rounded-br-full bg-neutral-300 dark:bg-neutral-700 group-hover/feature:bg-blue-500 transition-all duration-200 origin-center" />
+                <div className="flex w-full flex-col">
+                  <div className="flex flex-col">
+                    <span className="group-hover/feature:translate-x-2 transition duration-200 text-base inline-block text-black dark:text-neutral-100">
+                      {app.location}
+                    </span>
+                  </div>
+                  <h1 className="font-light -mt-1.5 text-nowrap overflow-scroll">
+                    {app.name} - {app.power} Watt
+                  </h1>
+                </div>
+                <div className="flex items-center justify-center space-x-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-6 w-6 shrink-0 rounded-full"
+                    onClick={() => updateTargetUsage(app.name, -1)} // Kurangi target usage
+                    disabled={
+                      targetUsage.find((item) => item.name === app.name)
+                        ?.target === 0
+                    }
+                  >
+                    <Minus />
+                    <span className="sr-only">Decrease</span>
+                  </Button>
+                  <div className="flex-1 text-center">
+                    <input
+                      name={`target-${app.name}`}
+                      type="number"
+                      value={
+                        targetUsage.find((item) => item.name === app.name)
+                          ?.target || 0
+                      }
+                      onChange={(e) => {
+                        const newTarget = Math.max(
+                          0,
+                          parseInt(e.target.value) || 0
+                        ); // Minimal 0
+                        setTargetUsage((prev) =>
+                          prev.map((item) =>
+                            item.name === app.name
+                              ? { ...item, target: newTarget }
+                              : item
+                          )
+                        );
+                      }}
+                      className="w-full text-2xl font-bold tracking-tighter bg-transparent border-none focus:outline-none text-center"
+                    />
+                    <div className="text-[0.60rem] font-medium uppercase text-muted-foreground -mt-5">
+                      Hours/Day
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-6 w-6 shrink-0 rounded-full"
+                    onClick={() => updateTargetUsage(app.name, 1)} // Tambah target usage
+                  >
+                    <Plus />
+                    <span className="sr-only">Increase</span>
+                  </Button>
                 </div>
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="h-6 w-6 shrink-0 rounded-full"
-                onClick={() => updateTargetUsage(app.name, 1)} // Tambah target usage
-              >
-                <Plus />
-                <span className="sr-only">Increase</span>
-              </Button>
+              <div></div>
             </div>
-          </div>
-          <div></div>
+          ))}
+          {success && (
+            <div
+              id="toast-danger"
+              className="flex items-center w-fit p-4 mb-4 text-black bg-gradient-to-br from-lightGray via-lightGray to-teal-300 rounded-lg shadow fixed bottom-5 right-5 z-10"
+              role="alert"
+            >
+              <div className="text-xl text-emerald-500">
+                <IoCheckmarkDoneCircle />
+              </div>
+              <div className="ms-1 text-sm font-normal">
+                Great! Your data has been saved successfully and is now ready to
+                generate.
+              </div>
+            </div>
+          )}
         </div>
-      ))}
-      <div className="fixed bottom-10 left-1/2 -translate-x-1/2">
-        <button
-          onClick={setDailyTarget}
-          className="mr-6 py-2.5 px-6 rounded-full bg-gradient-to-br hover:bg-gradient-to-br from-teal-300 hover:from-yellow-300 via-lightGray to-tealBright hover:to-orange-400 shadow-strong shadow-white uppercase text-lg tracking-[.2rem] font-bold font-inter hover:shadow-orange-400 duration-500 cursor-pointer"
-        >
-          Save
-        </button>
-        <button
-          onClick={generateRecommendation}
-          className="py-2.5 px-6 rounded-full bg-gradient-to-br hover:bg-gradient-to-br from-teal-300 hover:from-yellow-300 via-lightGray to-tealBright hover:to-orange-400 shadow-strong shadow-white uppercase text-lg tracking-[.2rem] font-bold font-inter hover:shadow-orange-400 duration-500 cursor-pointer"
-        >
-          Generate Now
-        </button>
+        <div className="w-full flex justify-center items-center py-8">
+          <button
+            onClick={setDailyTarget}
+            className="mr-6 py-2.5 px-6 rounded-full bg-gradient-to-br hover:bg-gradient-to-br from-teal-300 hover:from-yellow-300 via-lightGray to-tealBright hover:to-orange-400 shadow-strong shadow-white uppercase text-lg tracking-[.2rem] font-bold font-inter hover:shadow-orange-400 duration-500 cursor-pointer"
+          >
+            Save
+          </button>
+          <button
+            onClick={generateRecommendation}
+            className="py-2.5 px-6 rounded-full bg-gradient-to-br hover:bg-gradient-to-br from-teal-300 hover:from-yellow-300 via-lightGray to-tealBright hover:to-orange-400 shadow-strong shadow-white uppercase text-lg tracking-[.2rem] font-bold font-inter hover:shadow-orange-400 duration-500 cursor-pointer"
+          >
+            Generate Now
+          </button>
+        </div>
       </div>
-      {success && (
-        <div
-          id="toast-danger"
-          className="flex items-center w-fit p-4 mb-4 text-black bg-gradient-to-br from-lightGray via-lightGray to-teal-300 rounded-lg shadow fixed bottom-5 right-5 z-10"
-          role="alert"
-        >
-          <div className="text-xl text-emerald-500">
-            <IoCheckmarkDoneCircle />
-          </div>
-          <div className="ms-1 text-sm font-normal">
-            Great! Your data has been saved successfully and is now ready to
-            generate.
-          </div>
-        </div>
-      )}
-    </div>
+    )
+  ) : (
+    <NotPremium />
   );
 }
 

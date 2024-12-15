@@ -197,6 +197,47 @@ export function mapStringsToObjects(data: string[]) {
   });
 }
 
+export function getTariffCost(golongan: string): number {
+  switch (golongan) {
+    case "Subsidi daya 450 VA":
+      return 415.0;
+    case "Subsidi daya 900 VA":
+      return 605.0;
+    case "R-1/TR daya 900 VA":
+      return 1352.0;
+    case "R-1/TR daya 1300 VA":
+      return 1444.7;
+    case "R-1/TR daya 2200 VA":
+      return 1444.7;
+    case "R-2/TR daya 3500 VA - 5500 VA":
+      return 1699.53;
+    case "R-3/TR daya 6600 VA ke atas":
+      return 1699.53;
+    case "B-2/TR daya 6600 VA - 200 kVA":
+      return 1444.7;
+    case "B-3/TM daya di atas 200 kVA":
+      return 1114.74;
+    case "I-3/TM daya di atas 200 kVA":
+      return 1114.74;
+    case "I-4/TT daya 30.000 kVA ke atas":
+      return 996.74;
+    case "P-1/TR daya 6600 VA - 200 kVA":
+      return 1699.53;
+    case "P-2/TM daya di atas 200 kVA":
+      return 1522.88;
+    case "P-3/TR penerangan jalan umum":
+      return 1699.53;
+    case "L/TR":
+      return 1644.0;
+    case "L/TM":
+      return 1644.0;
+    case "L/TT":
+      return 1644.0;
+    default:
+      return -1;
+  }
+}
+
 export function convertApplianceStringToObject(input: string) {
   const regex =
     /Name: (.+?), Type: (.+?), Priority: (true|false), Monthly Use: (.+?) kWh, Cost: Rp(.+?), Schedule: \[(.+)\]/;

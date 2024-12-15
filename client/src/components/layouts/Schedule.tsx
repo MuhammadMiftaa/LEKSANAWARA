@@ -8,11 +8,13 @@ import { useOutsideClick } from "@/hooks/use-outside-click";
 import {
   convertApplianceStringToObject,
   exportToPDF,
+  getTariffCost,
   mapStringsToObjects,
 } from "@/helper/function";
 import { FaRegFilePdf } from "react-icons/fa6";
 
-export default function Analytics() {
+export default function Schedule() {
+  const [Golongan, setGolongan] = useState<string>("");
   const golonganListrik = [
     "Subsidi daya 450 VA",
     "Subsidi daya 900 VA",
@@ -152,6 +154,9 @@ export default function Analytics() {
         <div className="flex flex-col items-center">
           <h1>Electricity Tier</h1>
           <select
+            onChange={(e) => {
+              setGolongan(e.target.value);
+            }}
             id="ElectricityTier"
             name="ElectricityTier"
             className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
@@ -166,6 +171,9 @@ export default function Analytics() {
               </option>
             ))}
           </select>
+          <p className="text-zinc-800 mt-1 text-xs">
+            IDR {getTariffCost(Golongan) > 0 && getTariffCost(Golongan)}/kWh
+          </p>
         </div>
         <div className="flex flex-col items-center">
           <h1 className="-mb-2">Set Your Target Cost</h1>

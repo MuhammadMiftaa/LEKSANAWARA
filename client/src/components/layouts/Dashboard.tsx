@@ -3,14 +3,14 @@ import { IoIosCloseCircleOutline } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
 import useSWR from "swr";
 import { Tabs } from "../ui/tabs";
-import RoomsTabs from "./Rooms";
-import Analytics from "./Analytics";
+import Rooms from "./Rooms";
+import Schedule from "./Schedule";
+import Analyze from "./Analyze";
 import { jwtDecode } from "jwt-decode";
 import { JwtPayload } from "../../types/type";
 import { Dropdown } from "flowbite-react";
 import { HiLogout } from "react-icons/hi";
 import { RiUploadCloud2Fill } from "react-icons/ri";
-import { Recommendations } from "./Recommendations";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -75,17 +75,17 @@ export default function Dashboard() {
     {
       title: "Rooms",
       value: "rooms",
-      content: <RoomsTabs />,
-    },
-    {
-      title: "Schedule",
-      value: "schedule",
-      content: <Analytics />,
+      content: <Rooms />,
     },
     {
       title: "Analyze",
       value: "analyze",
-      content: <Recommendations userEmail={payload?.email} />,
+      content: <Analyze userEmail={payload?.email} />,
+    },
+    {
+      title: "Schedule",
+      value: "schedule",
+      content: <Schedule />,
     },
   ];
 

@@ -18,7 +18,7 @@ import { OverusedDeviceComponent } from "../templates/OverusedDevice";
 import { NumberTicker } from "../ui/number-ticker";
 // import * as moment from "moment-duration-format";
 
-export default function RoomsTabs() {
+export default function Rooms() {
   // GET request to fetch table data🐳
   const [appliance, setAppliance] = useState<Appliance[]>([]);
   const applianceFetcher = (url: string, init: RequestInit | undefined) =>
@@ -159,7 +159,7 @@ export default function RoomsTabs() {
                       <p className="text-center text-[0.6rem]">Time Usage</p>
                     </div>
                     <div className="basis-1/2 flex flex-col items-center">
-                      <h2 className="text-center">{app.energy} W</h2>
+                      <h2 className="text-center">{app.energy} kWh</h2>
                       <p className="text-center text-[0.6rem]">
                         Energy Consumption
                       </p>

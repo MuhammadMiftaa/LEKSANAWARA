@@ -39,7 +39,7 @@ export function OverusedDeviceComponent(props: {
           >
             <CarouselContent className="-mt-1 h-[320px]">
               {props.data.map((app, index) => (
-                <CarouselItem key={index} className="pt-1 md:basis-1/2 w-full">
+                <CarouselItem key={index} className="pt-1 md:basis-1/2 w-full text-black">
                   <div className="p-1">
                     <Card className="relative border-none overflow-hidden rounded-2xl bg-gradient-to-br from-lightGray via-tealBright to-tealBright h-36">
                       <CardContent className="items-center justify-center p-3 flex flex-col">

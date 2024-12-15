@@ -12,7 +12,7 @@ import { IoIosWarning } from "react-icons/io";
 import { IoCheckmarkDoneCircle } from "react-icons/io5";
 import { FcElectroDevices } from "react-icons/fc";
 
-export function Recommendations(props: { userEmail: string }) {
+export default function Analyze(props: { userEmail: string }) {
   // GET request to fetch table data 🐳
   const [appliance, setAppliance] = useState<Appliance[]>([]);
   const applianceFetcher = (url: string, init: RequestInit | undefined) =>
@@ -57,6 +57,7 @@ export function Recommendations(props: { userEmail: string }) {
   }
 
   // Fungsi untuk set daily target🐳
+  const [success, setSuccess] = useState<boolean>(false);
   async function setDailyTarget() {
     const response = await fetch("http://localhost:8080/v1/set-daily-target", {
       method: "PUT",
@@ -70,6 +71,10 @@ export function Recommendations(props: { userEmail: string }) {
     const res = await response.json();
     if (res.status) {
       console.log(res);
+      setSuccess(true);
+      setTimeout(() => {
+        setSuccess(false);
+      }, 3000);
     } else {
       console.error(res);
     }
@@ -235,6 +240,21 @@ export function Recommendations(props: { userEmail: string }) {
           Generate Now
         </button>
       </div>
+      {success && (
+        <div
+          id="toast-danger"
+          className="flex items-center w-fit p-4 mb-4 text-black bg-gradient-to-br from-lightGray via-lightGray to-teal-300 rounded-lg shadow fixed bottom-5 right-5 z-10"
+          role="alert"
+        >
+          <div className="text-xl text-emerald-500">
+            <IoCheckmarkDoneCircle />
+          </div>
+          <div className="ms-1 text-sm font-normal">
+            Great! Your data has been saved successfully and is now ready to
+            generate.
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -271,7 +291,7 @@ function AnalyzeResult({ data }: { data: ResponseType }) {
     <div className="h-full w-full py-6">
       <div className="w-full flex justify-between items-start">
         <div>
-          <h1 className="text-2xl uppercase font-semibold font-inter ml-4 mb-3 text-lightGray w-fit">
+          <h1 className="text-xl shadow-strong shadow-lightGray font-inter ml-4 mb-3 text-black bg-gradient-to-br from-lightGray via-lightGray to-teal-300 py-2 px-5 rounded-xl w-fit">
             Daily Appliance Usage Analysis
           </h1>
           <div className="ml-4 w-24 h-0.5 bg-lightGray mb-4"></div>
@@ -279,7 +299,7 @@ function AnalyzeResult({ data }: { data: ResponseType }) {
         <div className="flex">
           <div className="h-10 w-36 bg-gradient-to-br rounded-lg flex items-center from-lightGray via-lightGray to-teal-300 mr-4 justify-center">
             <h1 className="text-black font-light flex items-center">
-              Overused: {" "}
+              Overused:{" "}
               <span className="font-bold text-red-600 mr-1">
                 {cards.filter((card) => card.IsOveruse).length}
               </span>{" "}
@@ -288,7 +308,7 @@ function AnalyzeResult({ data }: { data: ResponseType }) {
           </div>
           <div className="h-10 w-32 bg-gradient-to-br rounded-lg flex items-center from-lightGray via-lightGray to-teal-300 mr-4 justify-center">
             <h1 className="text-black  font-light flex items-center">
-              Efficient: {" "}
+              Efficient:{" "}
               <span className="font-bold text-emerald-600 mr-1">
                 {cards.filter((card) => !card.IsOveruse).length}
               </span>{" "}
@@ -477,7 +497,7 @@ function AnalyzeResult({ data }: { data: ResponseType }) {
                 <div
                   className={`${
                     card.IsOveruse ? "text-red-600" : "text-emerald-600"
-                  } bg-[#202938] rounded-lg py-2 px-4 flex items-center gap-2`}
+                  } bg-gradient-to-br from-lightGray via-lightGray to-teal-300 font-inter rounded-lg py-2 px-4 flex items-center gap-2`}
                 >
                   <div>
                     {card.IsOveruse ? (

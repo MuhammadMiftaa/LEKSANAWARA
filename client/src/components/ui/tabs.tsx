@@ -265,7 +265,13 @@ export const Tabs = ({
               <p className="font-inter mt-4 text-zinc-600 text-xs font-light">
                 Track your appliance energy usage every day and stay in control.
               </p>
-              <div className="flex text-white gap-2 mt-4 items-center">
+              <div className="flex text-white gap-2 mt-4 items-center font-inter">
+                <div className="border-[1.5px] border-orange-400 rounded-full text-white text-sm w-fit p-1">
+                  <FaCheck />
+                </div>
+                <h1 className="text-lg">Smart Scheduling</h1>
+              </div>
+              <div className="flex text-white gap-2 mt-4 items-center font-inter">
                 <div className="border-[1.5px] border-orange-400 rounded-full text-white text-sm w-fit p-1">
                   <FaCheck />
                 </div>

@@ -2,7 +2,7 @@
 import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useId, useRef, useState } from "react";
-import { Recommendations } from "@/types/type";
+import { JwtPayload, Recommendations } from "@/types/type";
 import { AnimatePresence, motion } from "framer-motion";
 import { useOutsideClick } from "@/hooks/use-outside-click";
 import {
@@ -12,8 +12,39 @@ import {
   mapStringsToObjects,
 } from "@/helper/function";
 import { FaRegFilePdf } from "react-icons/fa6";
+import { jwtDecode } from "jwt-decode";
+import NotPremium from "../templates/NotPremium";
 
 export default function Schedule() {
+  const [payload, setPayload] = useState<JwtPayload>({
+    email: "",
+    username: "",
+    premium: false,
+  });
+
+  function decodeJwt(token: string): JwtPayload | null {
+    try {
+      const decoded = jwtDecode(token);
+      return decoded as JwtPayload;
+    } catch (error) {
+      console.error("Invalid JWT token:", error);
+      return null;
+    }
+  }
+
+  useEffect(() => {
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("token="))
+      ?.split("=")[1];
+    if (token) {
+      const payload = decodeJwt(token);
+      if (payload) {
+        setPayload(payload);
+      }
+    }
+  }, []);
+
   const [Golongan, setGolongan] = useState<string>("");
   const golonganListrik = [
     "Subsidi daya 450 VA",
@@ -66,7 +97,7 @@ export default function Schedule() {
     const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
     const formattedNextMonth = nextMonth.toISOString().split("T")[0];
 
-    const payload = {
+    const inputs = {
       golongan: electricType,
       maks_biaya: targetCost,
       tanggal: formattedNextMonth,
@@ -81,7 +112,7 @@ export default function Schedule() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(inputs),
         }
       );
 
@@ -136,7 +167,7 @@ export default function Schedule() {
     exportToPDF(data);
   }
 
-  return (
+  return payload.premium ? (
     <div className="flex w-full h-full p-4 gap-4">
       <form
         onSubmit={handleSubmit}
@@ -237,6 +268,8 @@ export default function Schedule() {
         )}
       </div>
     </div>
+  ) : (
+    <NotPremium />
   );
 }
 

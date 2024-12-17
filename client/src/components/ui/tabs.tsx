@@ -9,6 +9,7 @@ import { Drawer } from "flowbite-react";
 import ChatComponent from "./chat-form";
 import { JwtPayload } from "@/types/type";
 import PricingCard from "../templates/PricingCard";
+import { TextGenerateEffect } from "./text-generate-effect";
 
 type Tab = {
   title: string;
@@ -230,7 +231,15 @@ export const Tabs = ({
                     : "bg-gradientStart self-end"
                 }`}
               >
-                <h1>{chat}</h1>
+                {idx % 2 === 0 ? (
+                  <TextGenerateEffect
+                    className="font-medium"
+                    duration={0.5}
+                    words={chat}
+                  />
+                ) : (
+                  <p className="font-medium text-sm">{chat}</p>
+                )}
               </div>
             ))}
           </div>

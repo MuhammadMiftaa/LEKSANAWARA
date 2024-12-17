@@ -93,9 +93,8 @@ export const FileUpload = ({
           <div className="relative w-full mt-10 max-w-xl mx-auto">
             {files.length > 0 &&
               files.map((file, idx) => (
-                <>
+                <motion.div key={"file" + idx}>
                   <motion.div
-                    key={"file" + idx}
                     layoutId={idx === 0 ? "file-upload" : "file-upload-" + idx}
                     className={cn(
                       "relative overflow-hidden z-40 bg-white dark:bg-neutral-900 flex flex-col items-start justify-start md:h-24 p-4 mt-4 w-full mx-auto rounded-md",
@@ -149,7 +148,7 @@ export const FileUpload = ({
                   >
                     Go to Dashboard
                   </Link>
-                </>
+                </motion.div>
               ))}
             {!files.length && (
               <motion.div

@@ -15,6 +15,7 @@ import { jwtDecode } from "jwt-decode";
 import NotPremium from "../templates/NotPremium";
 
 export default function Analyze() {
+  // Get JWT payload from cookie 🍪
   const [payload, setPayload] = useState<JwtPayload>({
     email: "",
     username: "",
@@ -43,8 +44,9 @@ export default function Analyze() {
       }
     }
   }, []);
+  // Get JWT payload from cookie 🍪
 
-  // GET request to fetch table data 🐳
+  // GET request to fetch appliance data 🐳
   const [appliance, setAppliance] = useState<Appliance[]>([]);
   const applianceFetcher = (url: string, init: RequestInit | undefined) =>
     fetch(url, init).then((res) => res.json());
@@ -61,7 +63,6 @@ export default function Analyze() {
   useEffect(() => {
     if (data?.status) {
       setAppliance(data.data);
-      // Inisialisasi targetUsage berdasarkan appliance
       const initialUsage = data.data.map((app: Appliance) => ({
         name: app.name,
         target: app.daily_use_target,
@@ -69,13 +70,42 @@ export default function Analyze() {
       setTargetUsage(initialUsage);
     }
   }, [data]);
-  // GET request to fetch table data 🐳
+  // GET request to fetch appliance data 🐳
 
-  // State untuk target usage per appliance
+  // Fetch daily target history from Redis 🐳
+  const [historicalTarget, setHistoricalTarget] = useState<
+    { name: string; target: number }[]
+  >([]);
+  useEffect(() => {
+    const fetchHistoricalTarget = async () => {
+      const response = await fetch(
+        "http://localhost:8080/v1/get-daily-target",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ email: payload.email }),
+        }
+      );
+
+      const res = await response.json();
+      if (res.status) {
+        setHistoricalTarget(res.data);
+      } else {
+        console.error("Failed to fetch historical data:", res);
+      }
+    };
+
+    fetchHistoricalTarget();
+  }, [payload.email]);
+  // Fetch daily target history from Redis 🐳
+
+  // Set target usage from historical data 🐳
   const [targetUsage, setTargetUsage] = useState<
     { name: string; target: number }[]
   >([]);
-
   // Fungsi untuk mengubah target usage berdasarkan appliance name
   function updateTargetUsage(name: string, adjustment: number) {
     setTargetUsage((prev) =>
@@ -87,7 +117,7 @@ export default function Analyze() {
     );
   }
 
-  // Fungsi untuk set daily target🐳
+  // Function to update daily target
   const [success, setSuccess] = useState<boolean>(false);
   async function setDailyTarget() {
     const response = await fetch("http://localhost:8080/v1/set-daily-target", {
@@ -110,7 +140,7 @@ export default function Analyze() {
       console.error(res);
     }
   }
-  // Fungsi untuk set daily target🐳
+
   const [recommendation, setRecommendation] = useState<ResponseType | null>();
   // Fungsi untuk generate recommendation🐳
   async function generateRecommendation() {
@@ -135,31 +165,13 @@ export default function Analyze() {
   }
   // Fungsi untuk generate recommendation🐳
 
-  // // Fungsi untuk mendapatkan target usage yang sudah ada🐳
-  // async function getExistingTarget() {
-  //   const response = await fetch("http://localhost:8080/v1/get-daily-target", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     credentials: "include",
-  //     body: JSON.stringify({ email: props.userEmail }),
-  //   });
-
-  //   const res = await response.json();
-  //   if (res.status) {
-  //     console.log(res);
-  //     setTargetUsage(res.data);
-  //     setDailyTarget();
-  //   } else {
-  //     console.error(res);
-  //   }
-  // }
-  // // Fungsi untuk mendapatkan target usage yang sudah ada🐳
-
-  // useEffect(() => {
-  //   getExistingTarget();
-  // }, []);
+  // Set target usage from historical data 🐳
+  useEffect(() => {
+    if (historicalTarget && historicalTarget.length > 0) {
+      setTargetUsage(historicalTarget);
+    }
+  }, [historicalTarget]);
+  // Set target usage from historical data 🐳
 
   return payload.premium ? (
     recommendation ? (
@@ -172,20 +184,11 @@ export default function Analyze() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 relative z-10 py-4 max-w-7xl mx-auto">
           {appliance.map((app, index) => (
             <div
-              key={app.name}
+              key={index}
               className={cn(
-                "flex flex-col lg:border-r  pt-10 relative group/feature dark:border-neutral-800",
-                (index === 0 || index === 4) &&
-                  "lg:border-l dark:border-neutral-800",
-                index < 4 && "lg:border-b dark:border-neutral-800"
+                "flex flex-col lg:border-r pt-10 relative group/feature"
               )}
             >
-              {index < 4 && (
-                <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-t from-neutral-100 dark:from-neutral-800 to-transparent" />
-              )}
-              {index >= 4 && (
-                <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-b from-neutral-100 dark:from-neutral-800 to-transparent" />
-              )}
               <div className="mb-4 relative z-10 px-10 text-neutral-600 dark:text-neutral-400">
                 <img
                   className="h-12 w-12 object-contain"
@@ -194,10 +197,9 @@ export default function Analyze() {
                 />
               </div>
               <div className="text-lg font-bold mb-2 relative z-10 px-10">
-                <div className="absolute left-0 inset-y-0 h-6 group-hover/feature:h-8 w-1 rounded-tr-full rounded-br-full bg-neutral-300 dark:bg-neutral-700 group-hover/feature:bg-blue-500 transition-all duration-200 origin-center" />
                 <div className="flex w-full flex-col">
                   <div className="flex flex-col">
-                    <span className="group-hover/feature:translate-x-2 transition duration-200 text-base inline-block text-black dark:text-neutral-100">
+                    <span className="text-base inline-block text-black dark:text-neutral-100">
                       {app.location}
                     </span>
                   </div>
@@ -211,7 +213,7 @@ export default function Analyze() {
                     variant="outline"
                     size="icon"
                     className="h-6 w-6 shrink-0 rounded-full"
-                    onClick={() => updateTargetUsage(app.name, -1)} // Kurangi target usage
+                    onClick={() => updateTargetUsage(app.name, -1)}
                     disabled={
                       targetUsage.find((item) => item.name === app.name)
                         ?.target === 0
@@ -252,14 +254,13 @@ export default function Analyze() {
                     variant="outline"
                     size="icon"
                     className="h-6 w-6 shrink-0 rounded-full"
-                    onClick={() => updateTargetUsage(app.name, 1)} // Tambah target usage
+                    onClick={() => updateTargetUsage(app.name, 1)}
                   >
                     <Plus />
                     <span className="sr-only">Increase</span>
                   </Button>
                 </div>
               </div>
-              <div></div>
             </div>
           ))}
           {success && (

@@ -159,15 +159,11 @@ export default function Dashboard() {
                   </h2>
                 </>
               ) : (
-                <h1
-                  className={`uppercase font-bold px-3 py-1 rounded-xl bg-gradient-to-br from-yellow-300 via-yellow-100 mr-2 to-yellow-300 text-lg ${
-                    !openHeader
-                      ? "delay-1000 tracking-[-1rem]"
-                      : " tracking-wide"
-                  }`}
-                >
-                  Premium
-                </h1>
+                <div className="cursor-pointer p-0.5 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-2xl overflow-hidden my-4  shadow-medium hover:shadow-orange-400 duration-300 shadow-black">
+                  <h1 className="cursor-pointer py-2 px-5 bg-gradient-to-r from-zinc-700 uppercase font-inter via-black to-zinc-800 text-orange-300 rounded-2xl text-lg ">
+                    Premium
+                  </h1>
+                </div>
               )}
             </div>
             <div

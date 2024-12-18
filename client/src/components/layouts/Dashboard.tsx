@@ -3,7 +3,7 @@ import { IoIosCloseCircleOutline } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
 import useSWR from "swr";
 import { Tabs } from "../ui/tabs";
-import Rooms from "./Rooms";
+import Overview from "./Overview";
 import Schedule from "./Schedule";
 import Analyze from "./Analyze";
 import { jwtDecode } from "jwt-decode";
@@ -72,9 +72,9 @@ export default function Dashboard() {
 
   const tabs = [
     {
-      title: "Rooms",
-      value: "rooms",
-      content: <Rooms />,
+      title: "Overview",
+      value: "overview",
+      content: <Overview />,
     },
     {
       title: "Analyze",

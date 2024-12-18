@@ -18,7 +18,7 @@ import { OverusedDeviceComponent } from "../templates/OverusedDevice";
 import { NumberTicker } from "../ui/number-ticker";
 // import * as moment from "moment-duration-format";
 
-export default function Rooms() {
+export default function Overview() {
   // GET request to fetch table data🐳
   const [appliance, setAppliance] = useState<Appliance[]>([]);
   const applianceFetcher = (url: string, init: RequestInit | undefined) =>

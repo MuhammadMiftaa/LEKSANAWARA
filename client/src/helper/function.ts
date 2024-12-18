@@ -46,7 +46,7 @@ export function processAppliances(data: AllAppliances) {
   const maxDurationIndex = durationHours.indexOf(Math.max(...durationHours));
   const maxDurationDevice = {
     "Device Name": data["Device Name"][maxDurationIndex],
-    "Device Type": data["Device Type"][maxEnergyIndex],
+    "Device Type": data["Device Type"][maxDurationIndex],
     "Duration (Hours)": durationHours[maxDurationIndex],
   };
 

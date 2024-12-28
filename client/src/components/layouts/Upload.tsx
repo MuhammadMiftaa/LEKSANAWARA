@@ -18,6 +18,7 @@ export default function Upload() {
   };
 
   const [files, setFiles] = useState<File[]>([]);
+
   const handleFileUpload = async (files: File[]) => {
     setFiles(files);
 
@@ -25,13 +26,32 @@ export default function Upload() {
 
     const formData = new FormData();
     formData.append("file", files[0]); // Mengambil file pertama dari array
-    formData.append("table", files[0]); // Add the same file with key "table" for additional processing
+    formData.append("upload_preset", "appliances_csv"); // Ganti dengan nama preset Anda
 
+    try {
+      const response = await fetch("https://api.cloudinary.com/v1_1/dblibr1t2/raw/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(formData);
+      
+      console.log("Upload successful:", { files, data });
+    } catch (error) {
+      console.error("Error uploading file:", error);
+    }
+  };
+
+  const submitFile = async () => {
     try {
       const response = await fetch("http://localhost:8080/v1/upload", {
         method: "POST",
         credentials: "include",
-        body: formData,
       });
 
       if (!response.ok) {
@@ -92,7 +112,7 @@ export default function Upload() {
           Hi, {payload?.username}
         </p>
         <div className="w-full max-w-4xl mx-auto bg-transparent rounded-lg font-poppins z-[9999]">
-          <FileUpload onChange={handleFileUpload} />
+          <FileUpload onChange={handleFileUpload} onSubmit={submitFile} />
         </div>
         <div className="w-64 h-10 rounded-full bg-white flex items-center justify-center gap-3">
           <img src="/logo.webp" alt="logo" className="w-8 h-8 rounded" />

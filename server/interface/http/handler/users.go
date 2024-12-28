@@ -86,6 +86,7 @@ func (user_handler *usersHandler) Login(c *gin.Context) {
 	}
 
 	c.SetCookie("token", *token, 60*60*24, "/", "localhost", false, false)
+	c.SetCookie("token", *token, 60*60*24, "/", "leksanawara.up.railway.app", true, true)
 
 	c.JSON(http.StatusOK, gin.H{
 		"statusCode": 200,
@@ -177,6 +178,7 @@ func (user_handler *usersHandler) CallbackGoogle(c *gin.Context) {
 		c.Redirect(http.StatusFound, redirect_url+"/login?token="+*tokenJWT)
 	}
 	c.SetCookie("token", *tokenJWT, 60*60*24, "/", "localhost", false, false)
+	c.SetCookie("token", *tokenJWT, 60*60*24, "/", "leksanawara.up.railway.app", true, true)
 
 	c.Redirect(http.StatusFound, redirect_url)
 }

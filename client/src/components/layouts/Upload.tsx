@@ -18,6 +18,7 @@ export default function Upload() {
   };
 
   const [files, setFiles] = useState<File[]>([]);
+
   const handleFileUpload = async (files: File[]) => {
     setFiles(files);
 
@@ -25,20 +26,35 @@ export default function Upload() {
 
     const formData = new FormData();
     formData.append("file", files[0]); // Mengambil file pertama dari array
-    formData.append("table", files[0]); // Add the same file with key "table" for additional processing
+    formData.append("upload_preset", "appliances_csv"); // Ganti dengan nama preset Anda
 
     try {
-      const response = await fetch("http://localhost:8080/v1/upload", {
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/dblibr1t2/raw/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      const { url } = data;
+
+      const readFile = await fetch("http://localhost:8080/v1/upload", {
         method: "POST",
         credentials: "include",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!readFile.ok)
+        throw new Error(`HTTP error! status: ${readFile.status}`);
+      console.log(formData);
 
-      const data = await response.json();
       console.log("Upload successful:", { files, data });
     } catch (error) {
       console.error("Error uploading file:", error);

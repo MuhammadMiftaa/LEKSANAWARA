@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"math"
 	"net/http"
 	"net/url"
@@ -38,42 +37,23 @@ func (h *fileHandler) UploadFileCSV(c *gin.Context) {
 	path := "./data"
 	absolutePath, _ := filepath.Abs(path)
 
-	// Menerima file dari form-data
-	file, err := c.FormFile("table")
+	var inputs struct {
+		URL string `json:"url"`
+	}
+
+	// Bind request body ke struct inputs
+	err := c.ShouldBindJSON(&inputs)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":     false,
-			"DANCOK":     "DANCOK",
 			"statusCode": 400,
 			"message":    err.Error(),
 		})
 		return
 	}
 
-	// Mengecek apakah storage sudah ada
-	if err = helper.StorageIsExist(absolutePath); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":     false,
-			"statusCode": 500,
-			"message":    errors.New("storage not found").Error(),
-		})
-		return
-	}
-
-	// Simpan file
-	fileName := "INPUT-TABLE" + filepath.Ext(file.Filename)
-	filePath := filepath.Join(absolutePath, fileName)
-	if err = c.SaveUploadedFile(file, filePath); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":     false,
-			"statusCode": 500,
-			"message":    err.Error(),
-		})
-		return
-	}
-
 	// Membaca file CSV
-	result, err := helper.ReadCSV(filepath.Join(absolutePath, "INPUT-TABLE.csv"))
+	result, err := helper.ReadCSV(filepath.Join(absolutePath, "INPUT-TABLE.csv"), inputs.URL)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":     false,
@@ -151,7 +131,7 @@ func (h *fileHandler) UploadFileCSV(c *gin.Context) {
 		"status":     true,
 		"statusCode": 200,
 		"message":    "Upload table success",
-		"data":       fileName,
+		"data":       result,
 	})
 }
 

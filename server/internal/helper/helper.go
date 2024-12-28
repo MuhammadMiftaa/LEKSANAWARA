@@ -4,7 +4,9 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"io"
 	"math/rand"
+	"net/http"
 	"net/smtp"
 	"os"
 	"regexp"
@@ -30,11 +32,36 @@ func StorageIsExist(path string) error {
 	return nil
 }
 
-func ReadCSV(filePath string) (map[string][]string, error) {
-	// Buka file CSV
+func ReadCSV(filePath, fileURL string) (map[string][]string, error) {
+	// Unduh file dari URL
+	response, err := http.Get(fileURL)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching file from URL: %w", err)
+	}
+	defer response.Body.Close()
+
+	// Cek status HTTP
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch file: %s", response.Status)
+	}
+
+	// Simpan file ke path lokal sementara
+	outFile, err := os.Create(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("error creating local file: %w", err)
+	}
+	defer outFile.Close()
+
+	// Salin data dari response body ke file lokal
+	_, err = io.Copy(outFile, response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error saving file locally: %w", err)
+	}
+
+	// Buka file CSV yang telah diunduh
 	fileExist, err := os.Open(filePath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error opening local file: %w", err)
 	}
 	defer fileExist.Close()
 
@@ -44,7 +71,7 @@ func ReadCSV(filePath string) (map[string][]string, error) {
 	// Membaca semua baris dari CSV
 	records, err := reader.ReadAll()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error reading CSV: %w", err)
 	}
 
 	// Membuat map untuk menyimpan data CSV
@@ -64,6 +91,12 @@ func ReadCSV(filePath string) (map[string][]string, error) {
 			key := header[i]
 			result[key] = append(result[key], value)
 		}
+	}
+
+	// Hapus file lokal setelah selesai (opsional)
+	err = os.Remove(filePath)
+	if err != nil {
+		fmt.Printf("warning: unable to delete temporary file: %v\n", err)
 	}
 
 	return result, nil
@@ -367,9 +400,9 @@ func ConvertToResponseType(data interface{}) interface{} {
 	switch v := data.(type) {
 	case entity.Users:
 		return entity.UsersResponse{
-			ID:    v.ID,
-			Name:  v.Name,
-			Email: v.Email,
+			ID:      v.ID,
+			Name:    v.Name,
+			Email:   v.Email,
 			Premium: v.Premium,
 		}
 	default:

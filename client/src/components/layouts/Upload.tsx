@@ -17,6 +17,7 @@ export default function Upload() {
     window.location.href = "/login";
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [files, setFiles] = useState<File[]>([]);
   const handleFileUpload = async (files: File[]) => {
     setFiles(files);

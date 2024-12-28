@@ -13,8 +13,11 @@ import { IoCheckmarkDoneCircle } from "react-icons/io5";
 import { FcElectroDevices } from "react-icons/fc";
 import { jwtDecode } from "jwt-decode";
 import NotPremium from "../templates/NotPremium";
+import { getBackendURL, getMode } from "@/lib/readenv";
 
 export default function Analyze() {
+  const backendURL =
+    getMode() === "production" ? getBackendURL() : "http://localhost:8080";
   // Get JWT payload from cookie
   const [payload, setPayload] = useState<JwtPayload>({
     email: "",
@@ -50,7 +53,7 @@ export default function Analyze() {
   const [appliance, setAppliance] = useState<Appliance[]>([]);
   const applianceFetcher = (url: string, init: RequestInit | undefined) =>
     fetch(url, init).then((res) => res.json());
-  const { data } = useSWR("http://localhost:8080/v1/appliance", (url) =>
+  const { data } = useSWR(`${backendURL}/v1/appliance`, (url) =>
     applianceFetcher(url, {
       method: "GET",
       headers: {
@@ -78,17 +81,14 @@ export default function Analyze() {
   >([]);
   useEffect(() => {
     const fetchHistoricalTarget = async () => {
-      const response = await fetch(
-        "http://localhost:8080/v1/get-daily-target",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({ email: payload.email }),
-        }
-      );
+      const response = await fetch(`${backendURL}/v1/get-daily-target`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email: payload.email }),
+      });
 
       const res = await response.json();
       if (res.status) {
@@ -120,7 +120,7 @@ export default function Analyze() {
   // Function to update daily target
   const [success, setSuccess] = useState<boolean>(false);
   async function setDailyTarget() {
-    const response = await fetch("http://localhost:8080/v1/set-daily-target", {
+    const response = await fetch(`${backendURL}/v1/set-daily-target`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -145,7 +145,7 @@ export default function Analyze() {
   // Fungsi untuk generate recommendation🐳
   async function generateRecommendation() {
     const response = await fetch(
-      "http://localhost:8080/v1/generate-daily-recommendations",
+      `${backendURL}/v1/generate-daily-recommendations`,
       {
         method: "POST",
         headers: {

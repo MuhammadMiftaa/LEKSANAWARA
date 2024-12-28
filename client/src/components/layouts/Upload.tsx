@@ -10,8 +10,12 @@ import {
 } from "@/components/ui/tooltip";
 import { jwtDecode } from "jwt-decode";
 import { JwtPayload } from "../../types/type";
+import { getBackendURL, getMode } from "@/lib/readenv";
 
 export default function Upload() {
+  const backendURL =
+    getMode() === "production" ? getBackendURL() : "http://localhost:8080";
+
   const handleLogout = (): void => {
     document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     window.location.href = "/login";
@@ -42,7 +46,7 @@ export default function Upload() {
       const data = await response.json();
       const { url } = data;
 
-      const readFile = await fetch("http://localhost:8080/v1/upload", {
+      const readFile = await fetch(`${backendURL}/v1/upload`, {
         method: "POST",
         credentials: "include",
         headers: {

@@ -14,8 +14,11 @@ import {
 import { FaRegFilePdf } from "react-icons/fa6";
 import { jwtDecode } from "jwt-decode";
 import NotPremium from "../templates/NotPremium";
+import { getBackendURL, getMode } from "@/lib/readenv";
 
 export default function Schedule() {
+  const backendURL =
+    getMode() === "production" ? getBackendURL() : "http://localhost:8080";
   const [payload, setPayload] = useState<JwtPayload>({
     email: "",
     username: "",
@@ -105,7 +108,7 @@ export default function Schedule() {
 
     try {
       const response = await fetch(
-        "http://localhost:8080/v1/generate-monthly-recommendations",
+        `${backendURL}/v1/generate-monthly-recommendations`,
         {
           method: "POST",
           credentials: "include",

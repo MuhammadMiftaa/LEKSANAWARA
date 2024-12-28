@@ -11,15 +11,18 @@ import { JwtPayload } from "../../types/type";
 import { Dropdown } from "flowbite-react";
 import { HiLogout } from "react-icons/hi";
 import { RiUploadCloud2Fill } from "react-icons/ri";
+import { getBackendURL, getMode } from "@/lib/readenv";
 
 export default function Dashboard() {
+  const backendURL =
+    getMode() === "production" ? getBackendURL() : "http://localhost:8080";
   const navigate = useNavigate();
 
   // GET request to fetch table data🐳
   const [table, setTable] = useState<string>("");
   const fetcher = (url: string, init: RequestInit | undefined) =>
     fetch(url, init).then((res) => res.json());
-  const { data } = useSWR("http://localhost:8080/v1/table", (url) =>
+  const { data } = useSWR(`${backendURL}/v1/table`, (url) =>
     fetcher(url, {
       method: "GET",
       headers: {

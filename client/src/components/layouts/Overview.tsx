@@ -16,14 +16,17 @@ import {
 import { ChartComponent } from "../templates/Chart";
 import { OverusedDeviceComponent } from "../templates/OverusedDevice";
 import { NumberTicker } from "../ui/number-ticker";
+import { getBackendURL, getMode } from "@/lib/readenv";
 // import * as moment from "moment-duration-format";
 
 export default function Overview() {
+  const backendURL =
+    getMode() === "production" ? getBackendURL() : "http://localhost:8080";
   // GET request to fetch table data🐳
   const [appliance, setAppliance] = useState<Appliance[]>([]);
   const applianceFetcher = (url: string, init: RequestInit | undefined) =>
     fetch(url, init).then((res) => res.json());
-  const { data } = useSWR("http://localhost:8080/v1/appliance", (url) =>
+  const { data } = useSWR(`${backendURL}/v1/appliance`, (url) =>
     applianceFetcher(url, {
       method: "GET",
       headers: {
@@ -73,16 +76,14 @@ export default function Overview() {
   });
   const allAppliancesFetcher = (url: string, init: RequestInit | undefined) =>
     fetch(url, init).then((res) => res.json());
-  const { data: alldata } = useSWR(
-    "http://localhost:8080/v1/all-appliances",
-    (url) =>
-      allAppliancesFetcher(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      })
+  const { data: alldata } = useSWR(`${backendURL}/v1/all-appliances`, (url) =>
+    allAppliancesFetcher(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    })
   );
 
   useEffect(() => {

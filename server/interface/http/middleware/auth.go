@@ -16,7 +16,8 @@ func AuthMiddleware() gin.HandlerFunc {
 				ctx.JSON(http.StatusUnauthorized, gin.H{
 					"statusCode": 401,
 					"status":     false,
-					"error":      "Unauthorized",
+					"error":      err.Error(),
+					"message":    "DANCOK",
 				})
 				ctx.Abort()
 				return
@@ -33,6 +34,7 @@ func AuthMiddleware() gin.HandlerFunc {
 				"statusCode": 401,
 				"status":     false,
 				"error":      "Unauthorized",
+				"message":    "JANCOK",
 			})
 			ctx.Abort()
 			return

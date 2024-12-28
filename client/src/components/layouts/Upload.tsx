@@ -17,7 +17,6 @@ export default function Upload() {
     window.location.href = "/login";
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [files, setFiles] = useState<File[]>([]);
   const handleFileUpload = async (files: File[]) => {
     setFiles(files);
@@ -47,34 +46,33 @@ export default function Upload() {
   };
 
   const [payload, setPayload] = useState<JwtPayload>({
-      email: "",
-      username: "",
-      premium: false,
-    });
-  
-    function decodeJwt(token: string): JwtPayload | null {
-      try {
-        const decoded = jwtDecode(token);
-        return decoded as JwtPayload;
-      } catch (error) {
-        console.error("Invalid JWT token:", error);
-        return null;
+    email: "",
+    username: "",
+    premium: false,
+  });
+
+  function decodeJwt(token: string): JwtPayload | null {
+    try {
+      const decoded = jwtDecode(token);
+      return decoded as JwtPayload;
+    } catch (error) {
+      console.error("Invalid JWT token:", error);
+      return null;
+    }
+  }
+
+  useEffect(() => {
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("token="))
+      ?.split("=")[1];
+    if (token) {
+      const payload = decodeJwt(token);
+      if (payload) {
+        setPayload(payload);
       }
     }
-  
-    useEffect(() => {
-      const token = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("token="))
-        ?.split("=")[1];
-      if (token) {
-        const payload = decodeJwt(token);
-        if (payload) {
-          setPayload(payload);
-        }
-      }
-    }, []);
-
+  }, []);
 
   return (
     <BackgroundGradientAnimation
@@ -116,6 +114,7 @@ export default function Upload() {
           </Tooltip>
         </TooltipProvider>
       </div>
+      <div className="hidden">{files.length}</div>
     </BackgroundGradientAnimation>
   );
 }

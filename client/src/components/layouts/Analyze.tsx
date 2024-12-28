@@ -15,7 +15,7 @@ import { jwtDecode } from "jwt-decode";
 import NotPremium from "../templates/NotPremium";
 
 export default function Analyze() {
-  // Get JWT payload from cookie 🍪
+  // Get JWT payload from cookie
   const [payload, setPayload] = useState<JwtPayload>({
     email: "",
     username: "",
@@ -179,7 +179,7 @@ export default function Analyze() {
     ) : (
       <div className="relative z-10">
         <h1 className="text-sm font-bold font-poppins z-50 sticky left-1/2 -translate-x-1/2 top-2 shadow-medium shadow-lightGray ml-4 mb-3 text-black bg-gradient-to-br from-lightGray via-lightGray to-teal-300 py-2 px-5 rounded-xl w-fit">
-          Set Daily Target Appliance
+          Device Limit Management
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 relative z-10 py-4 max-w-7xl mx-auto">
           {appliance.map((app, index) => (

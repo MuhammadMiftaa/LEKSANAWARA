@@ -29,36 +29,32 @@ export default function Upload() {
     formData.append("upload_preset", "appliances_csv"); // Ganti dengan nama preset Anda
 
     try {
-      const response = await fetch("https://api.cloudinary.com/v1_1/dblibr1t2/raw/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/dblibr1t2/raw/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
       const data = await response.json();
-      console.log(formData);
-      
-      console.log("Upload successful:", { files, data });
-    } catch (error) {
-      console.error("Error uploading file:", error);
-    }
-  };
+      const { url } = data;
 
-  const submitFile = async () => {
-    try {
-      const response = await fetch("http://localhost:8080/v1/upload", {
+      const readFile = await fetch("http://localhost:8080/v1/upload", {
         method: "POST",
         credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!readFile.ok)
+        throw new Error(`HTTP error! status: ${readFile.status}`);
+      console.log(formData);
 
-      const data = await response.json();
       console.log("Upload successful:", { files, data });
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -112,7 +108,7 @@ export default function Upload() {
           Hi, {payload?.username}
         </p>
         <div className="w-full max-w-4xl mx-auto bg-transparent rounded-lg font-poppins z-[9999]">
-          <FileUpload onChange={handleFileUpload} onSubmit={submitFile} />
+          <FileUpload onChange={handleFileUpload} />
         </div>
         <div className="w-64 h-10 rounded-full bg-white flex items-center justify-center gap-3">
           <img src="/logo.webp" alt="logo" className="w-8 h-8 rounded" />

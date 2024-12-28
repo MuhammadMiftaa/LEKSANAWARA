@@ -32,9 +32,7 @@ func StorageIsExist(path string) error {
 	return nil
 }
 
-func ReadCSV(filePath string) (map[string][]string, error) {
-	fileURL := "https://res.cloudinary.com/dblibr1t2/raw/upload/v1735356344/bhphln06papth5sj62mj.csv"
-
+func ReadCSV(filePath, fileURL string) (map[string][]string, error) {
 	// Unduh file dari URL
 	response, err := http.Get(fileURL)
 	if err != nil {

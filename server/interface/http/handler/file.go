@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 
@@ -33,10 +32,6 @@ func NewFileHandler(applianceService service.ApplianceService, fileService servi
 }
 
 func (h *fileHandler) UploadFileCSV(c *gin.Context) {
-	// Menentukan path
-	path := "./data"
-	absolutePath, _ := filepath.Abs(path)
-
 	var inputs struct {
 		URL string `json:"url"`
 	}
@@ -53,7 +48,7 @@ func (h *fileHandler) UploadFileCSV(c *gin.Context) {
 	}
 
 	// Membaca file CSV
-	result, err := helper.ReadCSV(filepath.Join(absolutePath, "INPUT-TABLE.csv"), inputs.URL)
+	result, err := helper.ReadCSV(inputs.URL)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":     false,
@@ -64,7 +59,7 @@ func (h *fileHandler) UploadFileCSV(c *gin.Context) {
 	}
 
 	// Parsing CSV ke struct
-	appliances, err := helper.ParseCSVtoSliceOfStruct(filepath.Join(absolutePath, "INPUT-TABLE.csv"))
+	appliances, err := helper.ParseCSVtoSliceOfStruct(inputs.URL)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":     false,

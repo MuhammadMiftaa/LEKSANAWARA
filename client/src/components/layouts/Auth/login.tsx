@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { getBackendURL, getMode } from "../../../lib/readenv";
+import axios from "axios";
 
 const postFormSchema = z.object({
   email: z.string().email(),
@@ -16,7 +17,8 @@ export default function SignInPage(props: {
   handleLogin: () => void;
   isAuthenticated: boolean;
 }) {
-  const backendURL = getMode() === "production" ? getBackendURL() : "http://localhost:8080"
+  const backendURL =
+    getMode() === "production" ? getBackendURL() : "http://localhost:8080";
 
   const navigate = useNavigate();
 
@@ -26,21 +28,20 @@ export default function SignInPage(props: {
     resolver: zodResolver(postFormSchema),
   });
 
-  const onSubmit = handleSubmit(async (data) => {    
-    const res = await fetch(`${backendURL}/v1/auth/login`, {
-      method: "POST",
-      credentials: "include",
+  const onSubmit = handleSubmit(async (data) => {
+    const response = await axios.post(`${backendURL}/v1/auth/login`, data, {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
-    }).then((res) => res.json());
+      withCredentials: true, // Menggantikan credentials: "include"
+    });
 
-    if (res.status) {
+    // Cek status respons dan lakukan aksi berdasarkan kondisi
+    if (response.data.status) {
       props.handleLogin();
       navigate("/");
     } else {
-      setError(res.message);
+      setError(response.data.message);
     }
   });
 

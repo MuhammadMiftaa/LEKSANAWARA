@@ -12,32 +12,12 @@ import { Dropdown } from "flowbite-react";
 import { HiLogout } from "react-icons/hi";
 import { RiUploadCloud2Fill } from "react-icons/ri";
 import { getBackendURL, getMode } from "@/lib/readenv";
+import { handleLogout } from "@/helper/function";
 
 export default function Dashboard() {
   const backendURL =
     getMode() === "production" ? getBackendURL() : "http://localhost:8080";
   const navigate = useNavigate();
-
-  // GET request to fetch table data🐳
-  const [table, setTable] = useState<string>("");
-  const fetcher = (url: string, init: RequestInit | undefined) =>
-    fetch(url, init).then((res) => res.json());
-  const { data } = useSWR(`${backendURL}/v1/table`, (url) =>
-    fetcher(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    })
-  );
-
-  useEffect(() => {
-    if (data?.status) setTable(data.data);
-  }, [data]);
-  // GET request to fetch table data🐳
-
-  const [openHeader, setOpenHeader] = useState<boolean>(true);
 
   const [payload, setPayload] = useState<JwtPayload>({
     email: "",
@@ -55,23 +35,38 @@ export default function Dashboard() {
     }
   }
 
+  const [token, setToken] = useState<string | null>(null);
   useEffect(() => {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("token="))
-      ?.split("=")[1];
-    if (token) {
-      const payload = decodeJwt(token);
-      if (payload) {
-        setPayload(payload);
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken);
+    if (storedToken) {
+      const decodedPayload = decodeJwt(storedToken);
+      if (decodedPayload) {
+        setPayload(decodedPayload);
       }
     }
   }, []);
 
-  const handleLogout = (): void => {
-    document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    window.location.href = "/login";
-  };
+  // GET request to fetch table data🐳
+  const [table, setTable] = useState<string>("");
+  const fetcher = (url: string, init: RequestInit | undefined) =>
+    fetch(url, init).then((res) => res.json());
+  const { data } = useSWR(`${backendURL}/v1/table`, (url) =>
+    fetcher(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+  );
+
+  useEffect(() => {
+    if (data?.status) setTable(data.data);
+  }, [data]);
+  // GET request to fetch table data🐳
+
+  const [openHeader, setOpenHeader] = useState<boolean>(true);
 
   const tabs = [
     {

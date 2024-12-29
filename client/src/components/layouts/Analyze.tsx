@@ -35,19 +35,17 @@ export default function Analyze() {
     }
   }
 
+  const [token, setToken] = useState<string | null>(null);
   useEffect(() => {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("token="))
-      ?.split("=")[1];
-    if (token) {
-      const payload = decodeJwt(token);
-      if (payload) {
-        setPayload(payload);
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken);
+    if (storedToken) {
+      const decodedPayload = decodeJwt(storedToken);
+      if (decodedPayload) {
+        setPayload(decodedPayload);
       }
     }
   }, []);
-  // Get JWT payload from cookie 🍪
 
   // GET request to fetch appliance data 🐳
   const [appliance, setAppliance] = useState<Appliance[]>([]);
@@ -58,8 +56,8 @@ export default function Analyze() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include",
     })
   );
 
@@ -85,8 +83,8 @@ export default function Analyze() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        credentials: "include",
         body: JSON.stringify({ email: payload.email }),
       });
 
@@ -124,8 +122,8 @@ export default function Analyze() {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include",
       body: JSON.stringify({ data: targetUsage, email: payload.email }),
     });
 
@@ -150,8 +148,8 @@ export default function Analyze() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        credentials: "include",
         body: JSON.stringify({ golongan: "R-1/TR daya 1300 VA" }),
       }
     );

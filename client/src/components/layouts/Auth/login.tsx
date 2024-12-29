@@ -14,7 +14,7 @@ const postFormSchema = z.object({
 type PostFormSchema = z.infer<typeof postFormSchema>;
 
 export default function SignInPage(props: {
-  handleLogin: () => void;
+  handleLogin: (token: string) => void;
   isAuthenticated: boolean;
 }) {
   const backendURL =
@@ -33,12 +33,11 @@ export default function SignInPage(props: {
       headers: {
         "Content-Type": "application/json",
       },
-      withCredentials: true, // Menggantikan credentials: "include"
     });
 
     // Cek status respons dan lakukan aksi berdasarkan kondisi
     if (response.data.status) {
-      props.handleLogin();
+      props.handleLogin(response.data.data);
       navigate("/");
     } else {
       setError(response.data.message);
@@ -67,11 +66,10 @@ export default function SignInPage(props: {
   useEffect(() => {
     const token = searchParams.get("token");
     if (token) {
-      document.cookie = `token=${token}; path=/`;
-      props.handleLogin();
+      props.handleLogin(token);
       navigate("/");
     }
-  });
+  },[searchParams]);
 
   return props.isAuthenticated ? (
     <Navigate to={"/"} />

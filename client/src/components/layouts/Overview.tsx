@@ -22,6 +22,13 @@ import { getBackendURL, getMode } from "@/lib/readenv";
 export default function Overview() {
   const backendURL =
     getMode() === "production" ? getBackendURL() : "http://localhost:8080";
+
+  const [token, setToken] = useState<string | null>(null);
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken);
+  }, []);
+
   // GET request to fetch table data🐳
   const [appliance, setAppliance] = useState<Appliance[]>([]);
   const applianceFetcher = (url: string, init: RequestInit | undefined) =>
@@ -31,8 +38,8 @@ export default function Overview() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include",
     })
   );
 
@@ -81,8 +88,8 @@ export default function Overview() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include",
     })
   );
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import ChatComponent from "./chat-form";
 import { JwtPayload } from "@/types/type";
 import PricingCard from "../templates/PricingCard";
 import { TextGenerateEffect } from "./text-generate-effect";
+import { getBackendURL, getMode } from "@/lib/readenv";
 
 type Tab = {
   title: string;
@@ -34,6 +35,15 @@ export const Tabs = ({
   openHeader?: boolean;
   payload?: JwtPayload;
 }) => {
+  const backendURL =
+    getMode() === "production" ? getBackendURL() : "http://localhost:8080";
+
+  const [token, setToken] = useState<string | null>(null);
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken);
+  }, []);
+
   const [active, setActive] = useState<Tab>(propTabs[0]);
   const [tabs, setTabs] = useState<Tab[]>(propTabs);
 
@@ -68,11 +78,11 @@ export const Tabs = ({
 
     try {
       // Lakukan fetch ke API
-      const response = await fetch("http://localhost:8080/v1/chat", {
+      const response = await fetch(`${backendURL}/v1/chat`, {
         method: "POST",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ question: userMessage }),
       });
@@ -98,17 +108,14 @@ export const Tabs = ({
 
   async function handleSetPremium() {
     try {
-      const response = await fetch(
-        "http://localhost:8080/v1/users/set-premium",
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email: payload?.email }),
-        }
-      );
+      const response = await fetch(`${backendURL}/v1/users/set-premium`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ email: payload?.email }),
+      });
 
       const data = await response.json();
 

@@ -21,7 +21,7 @@ type PostFormSchema = z.infer<typeof postFormSchema>;
 
 export default function SignUpPage(props: {
   isAuthenticated: boolean;
-  handleLogin: () => void;
+  handleLogin: (token: string) => void;
 }) {
   const backendURL = getMode() === "production" ? getBackendURL() : "http://localhost:8080"
 

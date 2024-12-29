@@ -408,9 +408,9 @@ func GenerateToken(username string, email string, premium bool) (string, error) 
 	return signedToken, nil
 }
 
-func VerifyToken(cookie string) (interface{}, error) {
+func VerifyToken(jwtToken string) (interface{}, error) {
 	secretKey := os.Getenv("JWT_SECRET")
-	token, _ := jwt.Parse(cookie, func(t *jwt.Token) (interface{}, error) {
+	token, _ := jwt.Parse(jwtToken, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("sign in to preceed")
 		}

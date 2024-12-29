@@ -2,6 +2,11 @@ import { AllAppliances, Appliance, OverusedDevices } from "@/types/type";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
+export const handleLogout = (): void => {
+  localStorage.removeItem("token");
+  window.location.href = "/login";
+};
+
 export function convertToHoursMinutes(decimalHours: number): string {
   const hours = Math.floor(decimalHours);
   const minutes = Math.round((decimalHours - hours) * 60);

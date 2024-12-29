@@ -7,16 +7,12 @@ import RegisterPage from "./components/layouts/Auth/register";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    const cookieString = document.cookie;
-    const cookies = cookieString.split("; ").reduce((acc, cookie) => {
-      const [key, value] = cookie.split("=");
-      acc[key] = value;
-      return acc;
-    }, {} as Record<string, string>);
-    return cookies.token !== undefined;
+    const token = localStorage.getItem("token");
+    return token ? true : false; 
   });
 
-  const handleLogin = () => {
+  const handleLogin = (token: string) => {
+    localStorage.setItem("token", token);
     setIsAuthenticated(true);
   };
 

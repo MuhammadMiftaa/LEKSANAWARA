@@ -35,15 +35,14 @@ export default function Schedule() {
     }
   }
 
+  const [token, setToken] = useState<string | null>(null);
   useEffect(() => {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("token="))
-      ?.split("=")[1];
-    if (token) {
-      const payload = decodeJwt(token);
-      if (payload) {
-        setPayload(payload);
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken);
+    if (storedToken) {
+      const decodedPayload = decodeJwt(storedToken);
+      if (decodedPayload) {
+        setPayload(decodedPayload);
       }
     }
   }, []);
@@ -111,9 +110,9 @@ export default function Schedule() {
         `${backendURL}/v1/generate-monthly-recommendations`,
         {
           method: "POST",
-          credentials: "include",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(inputs),
         }

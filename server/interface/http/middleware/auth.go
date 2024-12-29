@@ -9,38 +9,46 @@ import (
 )
 
 func AuthMiddleware() gin.HandlerFunc {
-	return gin.HandlerFunc(func(ctx *gin.Context) {
-		cookie, err := ctx.Cookie("token")
-		if err != nil {
-			if ctx.Request.URL.Path != "/" {
-				ctx.JSON(http.StatusUnauthorized, gin.H{
-					"statusCode": 401,
-					"status":     false,
-					"error":      err.Error(),
-					"message":    "DANCOK",
-				})
-				ctx.Abort()
-				return
-			} else {
-				ctx.Redirect(http.StatusSeeOther, "/login")
-				ctx.Abort()
-				return
-			}
-		}
+    return gin.HandlerFunc(func(ctx *gin.Context) {
+        authHeader := ctx.GetHeader("Authorization")
+        if authHeader == "" {
+            ctx.JSON(http.StatusUnauthorized, gin.H{
+                "statusCode": 401,
+                "status":     false,
+                "error":      "Unauthorized",
+            })
+            ctx.Abort()
+            return
+        }
 
-		userData, err := helper.VerifyToken(cookie)
-		if err != nil {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"statusCode": 401,
-				"status":     false,
-				"error":      "Unauthorized",
-				"message":    "JANCOK",
-			})
-			ctx.Abort()
-			return
-		}
+        // Periksa dan ambil token setelah "Bearer "
+        const bearerPrefix = "Bearer "
+        if len(authHeader) <= len(bearerPrefix) || authHeader[:len(bearerPrefix)] != bearerPrefix {
+            ctx.JSON(http.StatusUnauthorized, gin.H{
+                "statusCode": 401,
+                "status":     false,
+                "error":      "Invalid Authorization header format",
+            })
+            ctx.Abort()
+            return
+        }
 
-		ctx.Set("user_data", userData)
-		ctx.Next()
-	})
+        token := authHeader[len(bearerPrefix):]
+
+        // Verifikasi token
+        userData, err := helper.VerifyToken(token)
+        if err != nil {
+            ctx.JSON(http.StatusUnauthorized, gin.H{
+                "statusCode": 401,
+                "status":     false,
+                "error":      "Unauthorized",
+            })
+            ctx.Abort()
+            return
+        }
+
+        // Simpan data user di context
+        ctx.Set("user_data", userData)
+        ctx.Next()
+    })
 }

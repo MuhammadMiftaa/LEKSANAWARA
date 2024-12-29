@@ -11,15 +11,39 @@ import {
 import { jwtDecode } from "jwt-decode";
 import { JwtPayload } from "../../types/type";
 import { getBackendURL, getMode } from "@/lib/readenv";
+import { handleLogout } from "@/helper/function";
 
 export default function Upload() {
   const backendURL =
     getMode() === "production" ? getBackendURL() : "http://localhost:8080";
 
-  const handleLogout = (): void => {
-    document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    window.location.href = "/login";
-  };
+  const [payload, setPayload] = useState<JwtPayload>({
+    email: "",
+    username: "",
+    premium: false,
+  });
+
+  function decodeJwt(token: string): JwtPayload | null {
+    try {
+      const decoded = jwtDecode(token);
+      return decoded as JwtPayload;
+    } catch (error) {
+      console.error("Invalid JWT token:", error);
+      return null;
+    }
+  }
+
+  const [token, setToken] = useState<string | null>(null);
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken);
+    if (storedToken) {
+      const decodedPayload = decodeJwt(storedToken);
+      if (decodedPayload) {
+        setPayload(decodedPayload);
+      }
+    }
+  }, []);
 
   const [files, setFiles] = useState<File[]>([]);
 
@@ -48,9 +72,9 @@ export default function Upload() {
 
       const readFile = await fetch(`${backendURL}/v1/upload`, {
         method: "POST",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ url }),
       });
@@ -64,35 +88,6 @@ export default function Upload() {
       console.error("Error uploading file:", error);
     }
   };
-
-  const [payload, setPayload] = useState<JwtPayload>({
-    email: "",
-    username: "",
-    premium: false,
-  });
-
-  function decodeJwt(token: string): JwtPayload | null {
-    try {
-      const decoded = jwtDecode(token);
-      return decoded as JwtPayload;
-    } catch (error) {
-      console.error("Invalid JWT token:", error);
-      return null;
-    }
-  }
-
-  useEffect(() => {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("token="))
-      ?.split("=")[1];
-    if (token) {
-      const payload = decodeJwt(token);
-      if (payload) {
-        setPayload(payload);
-      }
-    }
-  }, []);
 
   return (
     <BackgroundGradientAnimation

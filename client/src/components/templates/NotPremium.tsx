@@ -2,8 +2,13 @@ import { useEffect, useState } from "react";
 import PricingCard from "./PricingCard";
 import { JwtPayload } from "@/types/type";
 import { jwtDecode } from "jwt-decode";
+import { getBackendURL, getMode } from "@/lib/readenv";
+import { handleLogout } from "@/helper/function";
 
 export default function NotPremium() {
+  const backendURL =
+    getMode() === "production" ? getBackendURL() : "http://localhost:8080";
+
   const [payload, setPayload] = useState<JwtPayload>({
     email: "",
     username: "",
@@ -20,15 +25,14 @@ export default function NotPremium() {
     }
   }
 
+  const [token, setToken] = useState<string | null>(null);
   useEffect(() => {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("token="))
-      ?.split("=")[1];
-    if (token) {
-      const payload = decodeJwt(token);
-      if (payload) {
-        setPayload(payload);
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken);
+    if (storedToken) {
+      const decodedPayload = decodeJwt(storedToken);
+      if (decodedPayload) {
+        setPayload(decodedPayload);
       }
     }
   }, []);
@@ -37,24 +41,20 @@ export default function NotPremium() {
 
   async function handleSetPremium() {
     try {
-      const response = await fetch(
-        "http://localhost:8080/v1/users/set-premium",
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email: payload?.email }),
-        }
-      );
+      const response = await fetch(`${backendURL}/v1/users/set-premium`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ email: payload?.email }),
+      });
 
       const data = await response.json();
 
       if (response.ok && data.status) {
         alert("Upgrade to premium success!");
-        document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-        window.location.href = "/login";
+        handleLogout();
       } else {
         alert("Upgrade to premium failed!");
       }

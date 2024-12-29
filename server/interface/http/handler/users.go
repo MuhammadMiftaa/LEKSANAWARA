@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"os"
 	"time"
 
 	"golang.org/x/oauth2"
@@ -15,8 +14,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-var mode = os.Getenv("MODE")
 
 type usersHandler struct {
 	usersService service.UsersService
